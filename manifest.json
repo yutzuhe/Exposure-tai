@@ -1,0 +1,24 @@
+{
+  "name": "終極版曝險雷達 V17.0",
+  "short_name": "曝險雷達",
+  "description": "終身財富規劃與極限曝險雷達戰情室",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0f1d",
+  "theme_color": "#0a0f1d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22110%22%20fill%3D%22%230a0f1d%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22190%22%20fill%3D%22none%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%2216%22%20stroke-dasharray%3D%2230%2015%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22120%22%20fill%3D%22none%22%20stroke%3D%22%23c084fc%22%20stroke-width%3D%2212%22%20opacity%3D%220.7%22%2F%3E%3Cpath%20d%3D%22M256%20256%20L390%20122%22%20stroke%3D%22%2334d399%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%2224%22%20fill%3D%22%2338bdf8%22%2F%3E%3C%2Fsvg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22110%22%20fill%3D%22%230a0f1d%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22190%22%20fill%3D%22none%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%2216%22%20stroke-dasharray%3D%2230%2015%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22120%22%20fill%3D%22none%22%20stroke%3D%22%23c084fc%22%20stroke-width%3D%2212%22%20opacity%3D%220.7%22%2F%3E%3Cpath%20d%3D%22M256%20256%20L390%20122%22%20stroke%3D%22%2334d399%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%2224%22%20fill%3D%22%2338bdf8%22%2F%3E%3C%2Fsvg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
