@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="曝險雷達">
-    <title>終極版曝險雷達 (V17.0 全息戰情室 & PWA 旗艦版)</title>
+    <title>終極版曝險雷達 (V17.3 逐項百分比視覺強化 & PWA 旗艦版)</title>
     <!-- 外部 CDN 載入 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -58,8 +58,7 @@
         .sandbox-btn-discard { background: rgba(0,0,0,0.2); border: 1px solid #fff; color: #fff; }
 
         /* =========================================================
-           V17.0 旗艦升級：12 欄全息 Bento Grid 桌面戰情室佈局
-           解決 display: contents 跨分頁調度與 Chart.js 軌道溢出問題
+           12 欄全息 Bento Grid 桌面戰情室佈局
            ========================================================= */
         body.war-room-mode { padding-bottom: 30px; }
         body.war-room-mode .app-container { max-width: 1680px; padding: 0 18px; } 
@@ -68,7 +67,6 @@
         body.war-room-mode .fab-container,
         body.war-room-mode #tab-notes { display: none !important; }
         
-        /* 在戰情室模式下，讓分頁容器隱形消融，內部卡片直接參與 12 欄 Grid */
         body.war-room-mode #tab-overview,
         body.war-room-mode #tab-details,
         body.war-room-mode #tab-cashflow,
@@ -90,7 +88,6 @@
         }
         body.war-room-mode .card { margin-bottom: 0; min-width: 0; }
 
-        /* 預設響應式跨欄配置 (手機/平板/桌面三級自適應) */
         body.war-room-mode .bento-span-12 { grid-column: span 12; }
         body.war-room-mode .bento-span-8  { grid-column: span 12; }
         body.war-room-mode .bento-span-6  { grid-column: span 12; }
@@ -116,7 +113,6 @@
             body.war-room-mode .bento-span-3  { grid-column: span 3; }
         }
 
-        /* 戰情室模式專用的區塊群組標題列 */
         .war-room-section-banner {
             display: none;
             grid-column: span 12;
@@ -131,6 +127,109 @@
             margin-top: 8px;
         }
         body.war-room-mode .war-room-section-banner { display: flex; align-items: center; justify-content: space-between; }
+
+        /* =========================================================
+           V17.3 核心升級：圓餅圖 + 逐項百分比可視化雙欄佈局
+           ========================================================= */
+        .chart-split-layout {
+            display: grid;
+            grid-template-columns: 155px minmax(0, 1fr);
+            gap: 14px;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+        .chart-split-layout.no-border {
+            border-top: none;
+            padding-top: 4px;
+        }
+        .doughnut-canvas-wrap {
+            height: 165px;
+            width: 155px;
+            position: relative;
+            margin: 0 auto;
+        }
+        .pct-legend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 210px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .pct-legend-item {
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 7px 10px;
+            transition: all 0.2s ease;
+        }
+        .pct-legend-item:hover {
+            border-color: rgba(56, 189, 248, 0.35);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .pct-legend-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 5px;
+        }
+        .pct-legend-name {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pct-color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        .pct-legend-stats {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .pct-badge-val {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--accent-cyan);
+        }
+        .pct-amt-val {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+        .pct-mini-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .pct-mini-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 400px) {
+            .chart-split-layout {
+                grid-template-columns: 1fr;
+            }
+            .doughnut-canvas-wrap {
+                height: 150px;
+                width: 150px;
+            }
+        }
 
         @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-8px) rotate(2deg); } 100% { transform: translateY(0px) rotate(0deg); } }
         .fleet-box { text-align: center; padding: 20px; margin: 15px 0 10px 0; border-radius: 16px; background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.3) 100%); border: 1px dashed rgba(255,255,255,0.1); transition: all 0.5s ease; position: relative; overflow: hidden; }
@@ -174,9 +273,7 @@
         .summary-cell.label { color: var(--text-sub); font-weight: 600; font-size: 14px;}
         .summary-cell.val { text-align: right; font-weight: 800; color: var(--text-main); font-size: 16px;}
         
-        /* 強制設定 min-width: 0 避免 Chart.js 在 Grid 內無限撐開 */
-        .chart-box { height: 230px; position: relative; margin: 12px 0; width: 100%; min-width: 0; }
-        .sub-chart-box { height: 220px; position: relative; margin-top: 15px; padding-top: 15px; width: 100%; min-width: 0; }
+        .chart-box { height: 220px; position: relative; margin: 12px 0; width: 100%; min-width: 0; }
         
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 8px; }
         .section-title { font-size: 16px; color: var(--text-main); font-weight: 800; display: flex; align-items: center; letter-spacing: 0.5px;}
@@ -212,9 +309,6 @@
         .inv-calc { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 13px; color: var(--text-sub); flex-wrap: wrap; }
         .inv-input-num { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 8px; color: var(--text-main); font-size: 13px; outline: none; text-align: right; width: 88px; font-weight: 600;}
         .inv-value { text-align: right; font-weight: 800; color: var(--accent-blue); font-size: 16px;}
-        
-        .api-status { text-align: right; font-size: 12px; color: var(--text-sub); margin-top: -5px; margin-bottom: 15px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; font-weight: 600;}
-        .btn-refresh { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); color: var(--accent-blue); border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; font-weight: 700;}
         
         .sim-box { background-color: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-top: 15px; }
         .slider-container { width: 100%; margin: 12px 0; display: flex; align-items: center; gap: 10px; }
@@ -273,16 +367,10 @@
         .note-item { background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;}
         .note-content-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: var(--text-main); }
         
-        .terminal-box { background: linear-gradient(180deg, rgba(2,6,23,0.9) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid var(--accent-blue); border-radius: 12px; padding: 16px; margin-top: 15px; position: relative; overflow: hidden;}
-        .terminal-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-blue); box-shadow: 0 0 10px var(--accent-blue); }
-        .terminal-header { font-size: 11px; color: var(--accent-blue); font-family: monospace; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-        .terminal-cmd { font-size: 16px; color: #fff; font-weight: 600; }
-
         .chronos-box { background: rgba(0,0,0,0.4); border: 1px dashed rgba(192, 132, 252, 0.5); border-radius: 12px; padding: 15px; margin-top: 15px; text-align: center; position: relative; overflow: hidden;}
         .chronos-title { font-size: 11px; color: var(--accent-purple); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .chronos-time { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(192,132,252,0.8); display: flex; align-items: baseline; justify-content: center; gap: 8px; flex-wrap: wrap;}
         .chronos-unit { font-size: 14px; color: var(--text-sub); font-weight: 700; }
-        .chronos-alert { font-size: 14px; color: var(--accent-red); font-weight: 700; }
         
         .footer { text-align: center; font-size: 12px; color: var(--text-sub); margin-top: 25px; line-height: 1.6; padding-bottom: 20px;}
         
@@ -291,17 +379,21 @@
         @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .ticker-content { display: inline-block; white-space: nowrap; animation: ticker 28s linear infinite; font-size: 13px; font-weight: 700; color: var(--accent-blue); letter-spacing: 1px; }
 
-        .quest-card { background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
-        .quest-card.completed { border-color: var(--accent-green); background: rgba(52, 211, 153, 0.08); }
+        /* 戰術成就與微型任務卡片樣式 */
+        .quest-card { background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; transition: all 0.3s ease; }
+        .quest-card:hover { border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.04); }
+        .quest-card.completed { border: 1px solid var(--accent-green); background: rgba(52, 211, 153, 0.08); box-shadow: 0 0 12px rgba(52, 211, 153, 0.12); }
         .quest-title { font-size: 13px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
-        .quest-desc { font-size: 11px; color: var(--text-sub); }
+        .quest-desc { font-size: 11px; color: var(--text-sub); line-height: 1.45; }
         
-        .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .badge-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 10px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; filter: grayscale(100%); opacity: 0.4; }
-        .badge-item.unlocked { filter: grayscale(0%); opacity: 1; background: rgba(251, 191, 36, 0.05); border-color: rgba(251, 191, 36, 0.4); box-shadow: 0 0 15px rgba(251,191,36,0.15); }
-        .badge-icon { font-size: 24px; }
-        .badge-item-title { font-size: 11px; font-weight: 800; color: var(--text-sub); }
-        .badge-item.unlocked .badge-item-title { color: var(--accent-orange); }
+        .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .badge-item { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 6px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; filter: grayscale(100%); opacity: 0.45; transition: all 0.4s ease; }
+        .badge-item.unlocked { filter: grayscale(0%); opacity: 1; background: rgba(251, 191, 36, 0.08); border-color: rgba(251, 191, 36, 0.45); transform: scale(1.02); box-shadow: 0 0 15px rgba(251,191,36,0.15); }
+        .badge-icon { font-size: 24px; transition: transform 0.3s; }
+        .badge-item.unlocked:hover .badge-icon { transform: scale(1.18) rotate(5deg); }
+        .badge-item-title { font-size: 11px; font-weight: 800; color: var(--text-sub); line-height: 1.2; }
+        .badge-item.unlocked .badge-item-title { color: var(--accent-orange); text-shadow: 0 0 5px rgba(251,191,36,0.3); }
+        .badge-item-cond { font-size: 9px; color: var(--text-sub); opacity: 0.85; line-height: 1.2; }
 
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
 
@@ -314,19 +406,6 @@
         .fab-item { display: flex; align-items: center; gap: 10px; background: transparent; border: none; cursor: pointer; color: var(--text-main); font-weight: 700; font-size: 14px; }
         .fab-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--input-bg); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--accent-blue); }
         .fab-label { background: rgba(15, 23, 42, 0.9); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); white-space: nowrap; }
-
-        /* 交易流水帳與 XIRR 樣式 */
-        .ledger-form { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:8px; align-items:end; }
-        .ledger-form .form-input, .ledger-form .inv-select { width:100%; min-width:0; box-sizing:border-box; }
-        .ledger-form .form-label { margin:0 0 4px; text-align:left; font-size: 11px; }
-        .ledger-table { display:flex; flex-direction:column; gap:8px; margin-top:14px; max-height: 280px; overflow-y: auto; }
-        .ledger-row { display:grid; grid-template-columns: 88px 64px minmax(90px, 1fr) minmax(100px, 1fr) 34px; gap:8px; align-items:center; padding:10px; border:1px solid var(--border-color); border-radius:10px; background:rgba(255,255,255,0.025); }
-        .ledger-meta { color:var(--text-sub); font-size:11px; line-height:1.45; }
-        .ledger-amount { font-size:13px; font-weight:800; text-align:right; }
-        .performance-grid { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; }
-        .performance-stat { border:1px solid var(--border-color); background:rgba(255,255,255,0.025); border-radius:10px; padding:10px; min-width:0; }
-        .performance-stat .label { color:var(--text-sub); font-size:11px; font-weight:700; margin-bottom:5px; }
-        .performance-stat .value { font-size:15px; font-weight:900; overflow-wrap:anywhere; }
 
         .bottom-nav { display: none; }
         @media (max-width: 768px) {
@@ -348,9 +427,6 @@
             .bottom-nav-item i { font-size: 18px; margin-bottom: 2px; }
             .bottom-nav-item.active { color: var(--accent-blue); text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
             .fab-container { bottom: calc(75px + env(safe-area-inset-bottom)) !important; }
-            .ledger-form { grid-template-columns:repeat(2, minmax(0, 1fr)); }
-            .ledger-form .ledger-wide { grid-column:span 2; }
-            .performance-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
         }
 
         button, .nav-tab, .bottom-nav-item, .fab-main, .fab-item { touch-action: manipulation; }
@@ -370,7 +446,7 @@
 
 <div class="app-container">
     <div class="header">
-        <div>📈 終極曝險雷達 <span style="font-size:11px; color:var(--accent-cyan); font-weight: 700;">(V17.0 全息戰情室 & PWA 旗艦版)</span></div>
+        <div>📈 終極曝險雷達 <span style="font-size:11px; color:var(--accent-cyan); font-weight: 700;">(V17.3 逐項百分比強化 & PWA 旗艦版)</span></div>
         <div class="header-actions">
             <button id="btn-pwa-install" class="shield-toggle-btn" style="color:var(--accent-green); border-color:var(--accent-green); display:none;" onclick="installPWA()"><i class="fa-solid fa-mobile-screen-button"></i> 安裝 App</button>
             <button id="btn-sandbox" class="shield-toggle-btn" style="color:var(--accent-purple); border-color:var(--accent-purple);" onclick="toggleSandbox()"><i class="fa-solid fa-flask"></i> 平行沙盤</button>
@@ -383,7 +459,7 @@
         <div class="ticker-content" id="ui-ticker-text">系統連線中... 準備接收市場數據與戰情指令...</div>
     </div>
 
-    <!-- 頂部核心指揮艙 (在戰情室模式下自動轉為三欄橫向儀表板) -->
+    <!-- 頂部核心指揮艙 -->
     <div style="padding: 0 15px;">
         <div class="card glow-card scanlines" style="margin-bottom: 12px; border-bottom: 4px solid var(--accent-blue); background: linear-gradient(180deg, var(--card-bg) 0%, rgba(15,23,42,0.85) 100%); position: relative;">
             
@@ -470,10 +546,10 @@
         <!-- 戰情室分區橫幅 1 -->
         <div class="war-room-section-banner">
             <span><i class="fa-solid fa-satellite-dish" style="margin-right:8px;"></i>第一戰區：全息雷達陣列與部位配置 (12-COL BENTO GRID)</span>
-            <span style="font-size:11px; color:var(--text-sub);">支援即時調倉與質押標記</span>
+            <span style="font-size:11px; color:var(--text-sub);">圓餅圖旁同步顯示逐項百分比與市值</span>
         </div>
 
-        <!-- 雷達陣列 -->
+        <!-- 雷達陣列 (V17.3 圓餅圖旁全面改為「逐項百分比與進度條明細」) -->
         <div id="tab-overview" class="tab-content">
             <div class="card blur-target vs-card-hover bento-span-12" style="padding: 16px 22px; background: rgba(255,255,255,0.03);" title="滑鼠懸停顯示實際金額">
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700;">
@@ -494,47 +570,63 @@
                 </div>
             </div>
 
+            <!-- 1. 曝險資產總體掃描 (圓餅圖 + 逐項百分比) -->
             <div class="card bento-span-4">
-                <div class="section-title">曝險資產總體掃描</div>
-                <div class="chart-box blur-target-chart"><canvas id="radarChart"></canvas></div>
+                <div class="section-title">曝險資產總體掃描 (實質曝險佔比)</div>
+                <div class="chart-split-layout no-border blur-target-chart">
+                    <div class="doughnut-canvas-wrap"><canvas id="radarChart"></canvas></div>
+                    <div id="radar-pct-list" class="pct-legend-list"></div>
+                </div>
             </div>
 
+            <!-- 2. 台股陣列 & 股票槓桿配置 (圓餅圖 + 逐項百分比) -->
             <div class="card bento-span-4">
                 <div class="section-header">
-                    <div class="section-title">台股陣列 (API 自動抓價)</div>
+                    <div class="section-title">台股陣列 (手動精準現值)</div>
                     <button class="btn-add" onclick="addStock()">＋ 新增艙位</button>
                 </div>
-                <div style="font-size:12px; color:var(--text-sub); margin-bottom:10px;">點擊「🛡️」納入券商質押擔保品；支援自訂彈性槓桿倍率。</div>
-                <div class="api-status">
-                    <span id="ui-api-status">最新同步: 尚未同步</span>
-                    <button class="btn-refresh" id="btn-fetch" onclick="fetchPrices()"><i class="fa-solid fa-rotate" style="margin-right:4px;"></i>對接證交所</button>
-                </div>
+                <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">點擊「🛡️」納入券商質押擔保品；支援自訂彈性槓桿倍率。</div>
                 <div id="stocks-container" class="blur-target"></div>
-                <div class="sub-chart-box blur-target-chart"><canvas id="stockChart"></canvas></div>
-                <div class="section-title" style="margin:16px 0 6px; color:var(--accent-orange); font-size:14px;">股票槓桿配置 (持倉市值)</div>
-                <div class="sub-chart-box blur-target-chart"><canvas id="leverageChart"></canvas></div>
+                
+                <div class="section-title" style="margin:16px 0 4px; color:var(--accent-blue); font-size:14px;">台股個股持倉佔比</div>
+                <div class="chart-split-layout blur-target-chart">
+                    <div class="doughnut-canvas-wrap"><canvas id="stockChart"></canvas></div>
+                    <div id="stock-pct-list" class="pct-legend-list"></div>
+                </div>
+
+                <div class="section-title" style="margin:18px 0 4px; color:var(--accent-orange); font-size:14px;">股票槓桿配置 (持倉市值佔比)</div>
+                <div class="chart-split-layout blur-target-chart">
+                    <div class="doughnut-canvas-wrap"><canvas id="leverageChart"></canvas></div>
+                    <div id="leverage-pct-list" class="pct-legend-list"></div>
+                </div>
             </div>
 
+            <!-- 3. 基金與多元資產陣列 (圓餅圖 + 逐項百分比) -->
             <div class="card bento-span-4">
                 <div class="section-header">
                     <div class="section-title">基金與多元資產陣列</div>
                     <button class="btn-add" onclick="addFund()">＋ 新增艙位</button>
                 </div>
-                <div style="font-size:12px; color:var(--text-sub); margin-bottom:10px;">可記錄海外基金、主動型 ETF 或數位資產現值。</div>
+                <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">可記錄海外基金、主動型 ETF 或數位資產現值。</div>
                 <div id="funds-container" class="blur-target"></div>
-                <div class="sub-chart-box blur-target-chart"><canvas id="fundChart"></canvas></div>
+
+                <div class="section-title" style="margin:16px 0 4px; color:var(--accent-purple); font-size:14px;">基金與多元資產持倉佔比</div>
+                <div class="chart-split-layout blur-target-chart">
+                    <div class="doughnut-canvas-wrap"><canvas id="fundChart"></canvas></div>
+                    <div id="fund-pct-list" class="pct-legend-list"></div>
+                </div>
             </div>
         </div>
 
         <!-- 戰情室分區橫幅 2 -->
         <div class="war-room-section-banner">
-            <span><i class="fa-solid fa-building-columns" style="margin-right:8px;"></i>第二戰區：資金水庫、借貸引擎與真實 XIRR 帳本</span>
-            <span style="font-size:11px; color:var(--text-sub);">資產負債表與現金流連動</span>
+            <span><i class="fa-solid fa-building-columns" style="margin-right:8px;"></i>第二戰區：資金水庫、借貸引擎與現金流水位</span>
+            <span style="font-size:11px; color:var(--text-sub);">資產負債表與活水調節閥</span>
         </div>
 
-        <!-- 資金核心 (含修復喚醒的 XIRR 與交易流水帳) -->
+        <!-- 資金核心 -->
         <div id="tab-details" class="tab-content">
-            <div class="card blur-target bento-span-4">
+            <div class="card blur-target bento-span-6">
                 <div class="section-header">
                     <div class="section-title">活水儲備庫 (銀行資產)</div>
                     <button class="btn-add" onclick="addAccountItem()">＋ 新增活存</button>
@@ -546,7 +638,7 @@
                 </div>
             </div>
 
-            <div class="card blur-target bento-span-4">
+            <div class="card blur-target bento-span-6">
                 <div class="section-header">
                     <div class="section-title">槓桿借貸引擎 (負債明細)</div>
                     <button class="btn-add" onclick="addDebtItem()">＋ 新增借貸</button>
@@ -556,61 +648,6 @@
                 <div style="margin-top:15px; text-align:right; font-size:14px; font-weight:700; color:var(--accent-red); background:rgba(248,113,113,0.05); padding:10px; border-radius:8px; border: 1px dashed rgba(248,113,113,0.2);">
                     負債引擎總額：$<span id="ui-total-debt-sum" data-val="0">0</span>
                 </div>
-            </div>
-
-            <!-- 喚醒並升級的：交易帳本與 XIRR 績效中心 -->
-            <div class="card blur-target bento-span-4" style="border: 1px solid rgba(34, 211, 238, 0.3); background: rgba(34, 211, 238, 0.04);">
-                <div class="section-header">
-                    <div class="section-title" style="color: var(--accent-cyan);">📊 真實損益與 XIRR 績效矩陣</div>
-                </div>
-                <div id="investment-performance" class="performance-grid" style="margin-bottom: 16px;"></div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
-                    <div class="section-title" style="font-size: 14px;">📝 新增資金與交易流水帳</div>
-                    <label style="font-size:11px; color:var(--accent-green); font-weight:700; display:flex; align-items:center; gap:4px; cursor:pointer;" title="勾選後，買賣台股會自動增減台股陣列股數與第一個台幣帳戶餘額">
-                        <input type="checkbox" id="tx-auto-sync" checked> 同步庫存與活水
-                    </label>
-                </div>
-                <div class="ledger-form">
-                    <div>
-                        <div class="form-label">類型</div>
-                        <select id="tx-type" class="inv-select" onchange="changeTransactionFields()">
-                            <option value="buy">買進</option>
-                            <option value="sell">賣出</option>
-                            <option value="dividend">股息</option>
-                            <option value="deposit">投入本金</option>
-                            <option value="withdrawal">提領資金</option>
-                            <option value="interest">借貸利息</option>
-                        </select>
-                    </div>
-                    <div>
-                        <div class="form-label">日期</div>
-                        <input type="date" id="tx-date" class="form-input" style="text-align:left; font-size:12px; padding:6px 8px;">
-                    </div>
-                    <div>
-                        <div class="form-label">代碼</div>
-                        <input type="text" id="tx-code" class="form-input" placeholder="例: 00631L" style="text-align:left; font-size:13px; padding:6px 8px;">
-                    </div>
-                    <div>
-                        <div class="form-label">名稱/備註</div>
-                        <input type="text" id="tx-name" class="form-input" placeholder="選填" style="text-align:left; font-size:13px; padding:6px 8px;">
-                    </div>
-                    <div id="tx-quantity-wrap">
-                        <div class="form-label">股數</div>
-                        <input type="number" id="tx-quantity" class="form-input" placeholder="0" style="font-size:13px; padding:6px 8px;">
-                    </div>
-                    <div id="tx-price-wrap">
-                        <div class="form-label">成交單價</div>
-                        <input type="number" id="tx-price" class="form-input" step="0.01" placeholder="0.0" style="font-size:13px; padding:6px 8px;">
-                    </div>
-                    <div class="ledger-wide">
-                        <div class="form-label" id="tx-amount-label">手續費</div>
-                        <input type="number" id="tx-amount" class="form-input" placeholder="可留白" style="font-size:13px; padding:6px 8px;">
-                    </div>
-                    <button class="btn-add" style="height:36px; display:flex; align-items:center; justify-content:center;" onclick="addTransaction()">＋ 寫入帳本</button>
-                </div>
-
-                <div id="transaction-list" class="ledger-table"></div>
             </div>
         </div>
 
@@ -873,7 +910,7 @@
             </div>
         </div>
 
-        <!-- 黑天鵝壓力測試 (含新增：質押維持率救援計算機) -->
+        <!-- 黑天鵝壓力測試 (含質押維持率救援計算機) -->
         <div id="tab-risk" class="tab-content">
             <div class="card bento-span-6" style="border: 1px solid rgba(248, 113, 113, 0.4); background: rgba(248, 113, 113, 0.05);">
                 <div class="section-header" style="margin-bottom: 10px;">
@@ -928,11 +965,11 @@
 
         <!-- 戰情室分區橫幅 4 -->
         <div class="war-room-section-banner">
-            <span><i class="fa-solid fa-compass" style="margin-right:8px;"></i>第四戰區：終身財富里程碑、蒙地卡羅與成長日曆</span>
+            <span><i class="fa-solid fa-compass" style="margin-right:8px;"></i>第四戰區：終身財富里程碑、戰術成就與成長日曆</span>
             <span style="font-size:11px; color:var(--text-sub);">跨星系雲端與 PWA 封裝</span>
         </div>
 
-        <!-- 雲端日誌、PWA 部署中樞與歷史快照 -->
+        <!-- 雲端日誌、戰術成就、PWA 部署中樞與歷史快照 -->
         <div id="tab-settings" class="tab-content">
             <!-- PWA 離線封裝與部署中樞 -->
             <div class="card bento-span-4" style="border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.05);">
@@ -1035,19 +1072,46 @@
                 </div>
             </div>
 
-            <div class="card bento-span-4" style="border: 1px solid rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.05);">
+            <!-- 🎮 戰術成就與微型任務 -->
+            <div class="card bento-span-4" style="border: 1px solid rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.05);">
                 <div class="section-header" style="margin-bottom: 10px;">
-                    <div class="section-title" style="color:var(--accent-orange);">🎮 戰術成就與微型任務</div>
+                    <div class="section-title" style="color:var(--accent-orange); text-shadow: 0 0 8px rgba(251,191,36,0.4);">🎮 戰術成就與微型任務</div>
                 </div>
-                <div id="ui-current-main-quest" style="margin-bottom: 12px;"></div>
+                <div id="ui-current-main-quest" style="margin-bottom: 14px;"></div>
+                <div style="font-size:12px; color:var(--text-sub); margin: 14px 0 8px 0; font-weight:800; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px;">🎯 進行中的支線任務：</div>
                 <div id="ui-side-quests"></div>
+                <div style="font-size:12px; color:var(--text-sub); margin: 16px 0 8px 0; font-weight:800; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px;">🏆 榮譽徽章牆 (達成自動點亮)：</div>
                 <div class="badge-grid" id="ui-badge-wall">
-                    <div class="badge-item" id="badge-first"><div class="badge-icon">🌱</div><div class="badge-item-title">啟航者</div></div>
-                    <div class="badge-item" id="badge-1m"><div class="badge-icon">💰</div><div class="badge-item-title">百萬將鋒</div></div>
-                    <div class="badge-item" id="badge-5m"><div class="badge-icon">🚀</div><div class="badge-item-title">半息巡航</div></div>
-                    <div class="badge-item" id="badge-runway"><div class="badge-icon">🛡️</div><div class="badge-item-title">防禦大師</div></div>
-                    <div class="badge-item" id="badge-debt"><div class="badge-icon">🪶</div><div class="badge-item-title">無重力</div></div>
-                    <div class="badge-item" id="badge-precise"><div class="badge-icon">⚖️</div><div class="badge-item-title">絕對精準</div></div>
+                    <div class="badge-item" id="badge-first" title="記錄第一筆資產歷史快照">
+                        <div class="badge-icon">🌱</div>
+                        <div class="badge-item-title">啟航者</div>
+                        <div class="badge-item-cond">首筆資產快照</div>
+                    </div>
+                    <div class="badge-item" id="badge-1m" title="自有淨資產突破 100 萬元">
+                        <div class="badge-icon">💰</div>
+                        <div class="badge-item-title">百萬將鋒</div>
+                        <div class="badge-item-cond">淨值破 100 萬</div>
+                    </div>
+                    <div class="badge-item" id="badge-5m" title="自有淨資產突破 500 萬元">
+                        <div class="badge-icon">🚀</div>
+                        <div class="badge-item-title">半息巡航</div>
+                        <div class="badge-item-cond">淨值破 500 萬</div>
+                    </div>
+                    <div class="badge-item" id="badge-runway" title="活水燃料續航力達 6 個月以上">
+                        <div class="badge-icon">🛡️</div>
+                        <div class="badge-item-title">防禦大師</div>
+                        <div class="badge-item-cond">續航 ≥ 6 個月</div>
+                    </div>
+                    <div class="badge-item" id="badge-debt" title="在保有借貸槓桿下，總負債比低於 30%">
+                        <div class="badge-icon">🪶</div>
+                        <div class="badge-item-title">無重力</div>
+                        <div class="badge-item-cond">負債比 &lt; 30%</div>
+                    </div>
+                    <div class="badge-item" id="badge-precise" title="實際曝險與目標曝險誤差小於 1%">
+                        <div class="badge-icon">⚖️</div>
+                        <div class="badge-item-title">絕對精準</div>
+                        <div class="badge-item-cond">曝險誤差 &lt; 1%</div>
+                    </div>
                 </div>
             </div>
 
@@ -1065,7 +1129,7 @@
         </div>
     </div>
 
-    <div class="footer">V17.0 全息戰情室旗艦版 (12-Col Bento Grid + XIRR 帳本 + PWA 離線架構)<br><span style="font-size: 11px; opacity: 0.6;">資料來源：台灣證交所/櫃買中心 OpenAPI + GAS 雲端協同</span></div>
+    <div class="footer">V17.3 純粹全息戰情室旗艦版 (逐項百分比強化 + 12-Col Bento Grid + PWA 離線架構)<br><span style="font-size: 11px; opacity: 0.6;">極簡高穩定架構 · 本地硬碟與 GAS 雲端雙重保護</span></div>
 </div>
 
 <div class="fab-container" id="ui-fab-container">
@@ -1074,7 +1138,6 @@
         <button class="fab-item" onclick="triggerFabAction('recordSnapshot')"><span class="fab-label">記錄快照</span><div class="fab-icon"><i class="fa-solid fa-camera"></i></div></button>
         <button class="fab-item" onclick="triggerFabAction('addStock')"><span class="fab-label">新增台股</span><div class="fab-icon"><i class="fa-solid fa-chart-line"></i></div></button>
         <button class="fab-item" onclick="triggerFabAction('addAccountItem')"><span class="fab-label">新增活存</span><div class="fab-icon"><i class="fa-solid fa-piggy-bank"></i></div></button>
-        <button class="fab-item" onclick="triggerFabAction('fetchPrices')"><span class="fab-label">對接股價</span><div class="fab-icon"><i class="fa-solid fa-rotate"></i></div></button>
     </div>
 </div>
 
@@ -1101,7 +1164,7 @@
         rebalanceTargetInv: 50,
         kellyMu: 8.0, kellySigma: 18.0, mcYears: 10, mcMu: 8.0, mcSigma: 18.0, mcPmt: 30000,
         livingExpense: 30000, blindMode: false, warRoomMode: false, sandboxMode: false,
-        accounts: [], debts: [], stocks: [], funds: [], notes: [], history: [], transactions: [], marketPrices: {},
+        accounts: [], debts: [], stocks: [], funds: [], notes: [], history: [],
         achievements: { first_blood: false, nw_1m: false, nw_5m: false, runway_6m: false, debt_light: false, perfect_exp: false },
         tacticsOrder: ['widget-rebalance', 'widget-dca', 'widget-vix', 'widget-dampener', 'widget-kelly', 'widget-glide', 'widget-manual'],
         tacticsPinned: []
@@ -1112,7 +1175,49 @@
     var sortableRetry = 0;
 
     /* =========================================================
-       效能優化：Debounce 防抖封裝 (解決滑桿掉幀與高頻寫入問題)
+       V17.3 核心新增：圓餅圖右側「逐項百分比與市值進度列」渲染器
+       ========================================================= */
+    function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var total = (values || []).reduce(function(sum, v) { return sum + (parseFloat(v) || 0); }, 0);
+        if (total <= 0 || !labels || labels.length === 0) {
+            container.innerHTML = `<div style="font-size:12px; color:var(--text-sub); text-align:center; padding:18px 6px; border:1px dashed rgba(255,255,255,0.08); border-radius:10px;">${emptyMsg || '尚無部位數據'}</div>`;
+            return;
+        }
+        var items = labels.map(function(label, idx) {
+            var val = parseFloat(values[idx]) || 0;
+            var pct = total > 0 ? (val / total) * 100 : 0;
+            var color = colors[idx % colors.length] || '#38bdf8';
+            return { label: label, val: val, pct: pct, color: color };
+        }).filter(function(item) { return item.val > 0; });
+
+        // 依佔比由大到小排序，讓視覺層次更清晰
+        items.sort(function(a, b) { return b.val - a.val; });
+
+        container.innerHTML = items.map(function(item) {
+            return `
+                <div class="pct-legend-item">
+                    <div class="pct-legend-top">
+                        <div class="pct-legend-name" title="${escapeHTML(item.label)}">
+                            <span class="pct-color-dot" style="background:${item.color}; box-shadow: 0 0 6px ${item.color};"></span>
+                            <span>${escapeHTML(item.label)}</span>
+                        </div>
+                        <div class="pct-legend-stats">
+                            <span class="pct-badge-val" style="color:${item.color};">${item.pct.toFixed(1)}%</span>
+                            <span class="pct-amt-val blur-target">$${formatNum(item.val)}</span>
+                        </div>
+                    </div>
+                    <div class="pct-mini-bar-bg">
+                        <div class="pct-mini-bar-fill" style="width:${Math.min(100, Math.max(2, item.pct))}%; background:${item.color};"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    /* =========================================================
+       效能優化：Debounce 防抖封裝
        ========================================================= */
     function debounce(fn, delay) {
         var timer = null;
@@ -1123,25 +1228,28 @@
         };
     }
 
-    var debouncedHeavyUpdate = debounce(function(v1x, v2x, totalCashSum, v0x, netWorth) {
+    var debouncedHeavyUpdate = debounce(function(v1x, v2x, totalCashSum, v0x) {
+        var radarData = [v1x, v2x, totalCashSum + v0x];
+        var radarLabels = ['1X 平穩推進', '2X+ 實質曝險', '防禦活水庫存'];
+        var radarColors = ['#34d399', '#ec4899', '#38bdf8'];
         if(charts.radar) {
-            charts.radar.data.datasets[0].data = [v1x, v2x, totalCashSum + v0x];
+            charts.radar.data.datasets[0].data = radarData;
             charts.radar.update('none');
         }
+        renderPctBreakdownList('radar-pct-list', radarLabels, radarData, radarColors, '尚無資產配置數據');
         updateSubCharts();
-        renderInvestmentPerformance(netWorth);
         saveData();
-    }, 120);
+    }, 100);
 
     /* =========================================================
-       PWA 雙軌自適應引擎 (動態 Manifest + 實體檔案產生器)
+       PWA 雙軌自適應引擎
        ========================================================= */
     var pwaIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#0a0f1d"/><circle cx="256" cy="256" r="190" fill="none" stroke="#38bdf8" stroke-width="16" stroke-dasharray="30 15"/><circle cx="256" cy="256" r="120" fill="none" stroke="#c084fc" stroke-width="12" opacity="0.7"/><path d="M256 256 L390 122" stroke="#34d399" stroke-width="18" stroke-linecap="round"/><circle cx="256" cy="256" r="24" fill="#38bdf8"/></svg>`;
     var pwaIconDataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(pwaIconSvg);
 
     function getManifestObject() {
         return {
-            name: "終極版曝險雷達 V17.0",
+            name: "終極版曝險雷達 V17.3",
             short_name: "曝險雷達",
             description: "終身財富規劃與極限曝險雷達戰情室",
             start_url: "./index.html",
@@ -1192,7 +1300,7 @@
             filename = "manifest.json";
         } else {
             filename = "sw.js";
-            content = `const CACHE_NAME = 'exposure-radar-v17-cache';
+            content = `const CACHE_NAME = 'exposure-radar-v17-3-cache';
 const ASSETS = [
   './',
   './index.html',
@@ -1262,7 +1370,6 @@ self.addEventListener('fetch', e => {
         if (action === 'recordSnapshot') { recordSnapshot(); showTab('tab-settings'); }
         else if (action === 'addStock') { addStock(); showTab('tab-overview'); }
         else if (action === 'addAccountItem') { addAccountItem(); showTab('tab-details'); }
-        else if (action === 'fetchPrices') { showTab('tab-overview'); setTimeout(() => { fetchPrices(); }, 150); }
     }
     document.addEventListener('click', function(event) { var fab = document.getElementById('ui-fab-container'); if (fab && fab.classList.contains('active') && !fab.contains(event.target)) fab.classList.remove('active'); });
 
@@ -1356,10 +1463,9 @@ self.addEventListener('fetch', e => {
     function normalizeStateShape(raw) {
         if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('備份檔格式不是有效物件');
         var normalized = Object.assign({}, raw);
-        ['accounts','debts','stocks','funds','notes','history','transactions'].forEach(key => {
+        ['accounts','debts','stocks','funds','notes','history'].forEach(key => {
             if (!Array.isArray(normalized[key])) normalized[key] = [];
         });
-        normalized.marketPrices = normalized.marketPrices || {};
         return normalized;
     }
     function createRestorePoint(reason) {
@@ -1375,7 +1481,7 @@ self.addEventListener('fetch', e => {
             if (saved) { 
                 var parsed = JSON.parse(saved);
                 if (parsed) {
-                    ['accounts','debts','stocks','funds','notes','history','transactions','marketPrices','achievements','tacticsOrder','tacticsPinned'].forEach(k => { if(parsed[k]) state[k] = parsed[k]; });
+                    ['accounts','debts','stocks','funds','notes','history','achievements','tacticsOrder','tacticsPinned'].forEach(k => { if(parsed[k]) state[k] = parsed[k]; });
                     ['cash','targetRatio','toleranceRatio','targetNetWorth','glideMax','glideMin','vix','biasRatio','kellyMu','kellySigma','mcYears','mcMu','mcSigma','mcPmt','livingExpense','rebalanceTargetInv'].forEach(k => { if(parsed[k] !== undefined) state[k] = parseFloat(parsed[k]); });
                     ['autoGlidepath','autoDampener','blindMode','warRoomMode'].forEach(k => { if(parsed[k] !== undefined) state[k] = parsed[k]; });
                     state.sandboxMode = false; state.gasUrl = parsed.gasUrl || state.gasUrl;
@@ -1385,7 +1491,6 @@ self.addEventListener('fetch', e => {
 
         if (!state.accounts || state.accounts.length === 0) state.accounts = [{ id: 'a1', name: '綜合活期預備金戶', balance: 0, currency: 'TWD' }];
         if (!state.debts || state.debts.length === 0) state.debts = [{ id: 'd1', type: 'pledge', name: '股票質押', principal: 0, rate: 2.5, term: 0 }];
-        if (!Array.isArray(state.transactions)) state.transactions = [];
 
         if (state.tacticsOrder && state.tacticsPinned && !state.tacticsOrder.includes('widget-rebalance') && !state.tacticsPinned.includes('widget-rebalance')) {
             state.tacticsOrder.unshift('widget-rebalance');
@@ -1463,7 +1568,7 @@ self.addEventListener('fetch', e => {
             state = JSON.parse(JSON.stringify(realStateBackup)); state.sandboxMode = false; realStateBackup = null;
             document.body.classList.remove('sandbox-mode'); document.getElementById('ui-sandbox-banner').style.display = 'none';
             var btn = document.getElementById('btn-sandbox'); if(btn) { btn.innerHTML = '<i class="fa-solid fa-flask"></i> 平行沙盤'; btn.onclick = toggleSandbox; }
-            renderStocks(); renderFunds(); renderDetailsPage(); renderTransactions(); updateTotals(); renderTacticsWidgets();
+            renderStocks(); renderFunds(); renderDetailsPage(); updateTotals(); renderTacticsWidgets();
         }
     }
 
@@ -1529,9 +1634,9 @@ self.addEventListener('fetch', e => {
     }
 
     function exportToFile() {
-        var exportState = Object.assign({}, state, { backupVersion: 'v17.0-bento-pwa', exportedAt: new Date().toISOString() });
+        var exportState = Object.assign({}, state, { backupVersion: 'v17.3-pct-visual', exportedAt: new Date().toISOString() });
         var blob = new Blob([JSON.stringify(exportState, null, 2)], { type: "application/json" }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = `exposure_backup_v17_${getLocalDateString()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        a.download = `exposure_backup_v17_3_${getLocalDateString()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
     
     function importFromFile(event) {
@@ -1657,122 +1762,13 @@ self.addEventListener('fetch', e => {
     function addDebtItem() { state.debts.push({ id:'d'+Date.now(), type:'credit', name:'新借貸引擎', principal:0, rate: 3.0, term: 7 }); renderDetailsPage(); updateTotals(); }
     function removeDetailItem(type, idx) { state[type].splice(idx,1); renderDetailsPage(); updateTotals(); }
 
-    /* =========================================================
-       喚醒並強化：交易流水帳、庫存連動與 XIRR 真實年化績效
-       ========================================================= */
-    var transactionTypes = {
-        buy: { label: '買進', color: 'var(--accent-green)' }, sell: { label: '賣出', color: 'var(--accent-red)' },
-        dividend: { label: '股息', color: 'var(--accent-cyan)' }, deposit: { label: '投入', color: 'var(--accent-blue)' },
-        withdrawal: { label: '提領', color: 'var(--accent-orange)' }, interest: { label: '利息', color: 'var(--accent-cyan)' }
-    };
-    function transactionNumber(id) { var el = document.getElementById(id); return el ? Math.max(0, parseFloat(el.value) || 0) : 0; }
-    function changeTransactionFields() {
-        var typeEl = document.getElementById('tx-type'); if(!typeEl) return;
-        var type = typeEl.value;
-        var trading = type === 'buy' || type === 'sell';
-        document.getElementById('tx-quantity-wrap').style.display = trading ? '' : 'none';
-        document.getElementById('tx-price-wrap').style.display = trading ? '' : 'none';
-        document.getElementById('tx-amount-label').innerText = trading ? '手續費' : '金額';
-        document.getElementById('tx-amount').placeholder = trading ? '可留白' : '必填';
-    }
-    function addTransaction() {
-        var type = document.getElementById('tx-type').value;
-        var date = document.getElementById('tx-date').value || getLocalDateString();
-        var code = document.getElementById('tx-code').value.trim().toUpperCase();
-        var name = document.getElementById('tx-name').value.trim();
-        var quantity = transactionNumber('tx-quantity'); var price = transactionNumber('tx-price'); var amount = transactionNumber('tx-amount');
-        var trading = type === 'buy' || type === 'sell';
-        if (trading && (!code || quantity <= 0 || price <= 0)) return alert('買進或賣出請填寫代碼、股數與單價。');
-        if (!trading && amount <= 0) return alert('這筆紀錄請填寫金額。');
-
-        // 若勾選自動同步庫存與活水
-        var autoSync = document.getElementById('tx-auto-sync')?.checked;
-        if (autoSync) {
-            var twdAcc = state.accounts.find(a => a.currency === 'TWD') || state.accounts[0];
-            if (trading) {
-                var targetStock = state.stocks.find(s => (s.code || '').trim().toUpperCase() === code);
-                var cashImpact = (quantity * price) + (type === 'buy' ? amount : -amount);
-                if (type === 'buy') {
-                    if (targetStock) { targetStock.shares = (parseFloat(targetStock.shares)||0) + quantity; targetStock.price = price; }
-                    else { state.stocks.push({ id: 's'+Date.now(), broker: name || '預設券商', code: code, shares: quantity, price: price, mult: code.endsWith('L') ? 2 : 1, isCollateral: false }); }
-                    if (twdAcc) twdAcc.balance = Math.max(0, (parseFloat(twdAcc.balance)||0) - cashImpact);
-                } else if (type === 'sell') {
-                    if (targetStock) targetStock.shares = Math.max(0, (parseFloat(targetStock.shares)||0) - quantity);
-                    if (twdAcc) twdAcc.balance = (parseFloat(twdAcc.balance)||0) + cashImpact;
-                }
-                renderStocks(); renderDetailsPage();
-            } else if (twdAcc) {
-                if (type === 'dividend' || type === 'deposit') twdAcc.balance = (parseFloat(twdAcc.balance)||0) + amount;
-                else if (type === 'withdrawal' || type === 'interest') twdAcc.balance = Math.max(0, (parseFloat(twdAcc.balance)||0) - amount);
-                renderDetailsPage();
-            }
-        }
-
-        state.transactions.push({ id: 't' + Date.now(), createdAt: Date.now(), date: date, type: type, code: code, name: name, quantity: quantity, price: price, amount: amount });
-        saveData(); renderTransactions(); updateTotals();
-        ['tx-code','tx-name','tx-quantity','tx-price','tx-amount'].forEach(id => { var el = document.getElementById(id); if(el) el.value = ''; });
-    }
-    function deleteTransaction(id) { if (confirm('刪除這筆交易紀錄？')) { state.transactions = state.transactions.filter(tx => tx.id !== id); saveData(); renderTransactions(); updateTotals(); } }
-    function getTransactionMetrics() {
-        var positions = {}, realized = 0, dividends = 0, interest = 0, totalBuy = 0, totalSell = 0, fees = 0, deposits = 0, withdrawals = 0;
-        var transactions = (state.transactions || []).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)) || ((a.createdAt || 0) - (b.createdAt || 0)));
-        transactions.forEach(function(tx) {
-            var type = tx.type, qty = parseFloat(tx.quantity) || 0, price = parseFloat(tx.price) || 0, amount = parseFloat(tx.amount) || 0, code = (tx.code || '').trim().toUpperCase();
-            if (type === 'buy') { var buyCost = qty * price + amount; if (!positions[code]) positions[code] = { qty: 0, cost: 0, lastPrice: price }; positions[code].qty += qty; positions[code].cost += buyCost; positions[code].lastPrice = price; totalBuy += buyCost; fees += amount; }
-            else if (type === 'sell') { var position = positions[code] || { qty: 0, cost: 0, lastPrice: price }; var matched = Math.min(qty, position.qty); var averageCost = position.qty > 0 ? position.cost / position.qty : 0; var proceeds = qty * price - amount; realized += proceeds - (matched * averageCost); position.qty -= matched; position.cost -= matched * averageCost; position.lastPrice = price; positions[code] = position; totalSell += proceeds; fees += amount; }
-            else if (type === 'dividend') dividends += amount;
-            else if (type === 'interest') interest += amount;
-            else if (type === 'deposit') deposits += amount;
-            else if (type === 'withdrawal') withdrawals += amount;
-        });
-        var prices = {}; (state.stocks || []).forEach(s => { var c = (s.code || '').trim().toUpperCase(); if (c) prices[c] = parseFloat(s.price) || 0; });
-        var unrealized = 0; Object.keys(positions).forEach(code => { var p = positions[code]; if (p.qty > 0) unrealized += p.qty * (prices[code] || p.lastPrice || 0) - p.cost; });
-        return { positions, realized, dividends, interest, totalBuy, totalSell, fees, deposits, withdrawals, unrealized, totalPnl: realized + unrealized + dividends - interest };
-    }
-    function calculateXirr(flows) {
-        if (!flows || flows.length < 2) return null;
-        var start = new Date(flows[0].date + 'T00:00:00');
-        function npv(rate) { return flows.reduce((sum, flow) => { var days = (new Date(flow.date + 'T00:00:00') - start) / 86400000; return sum + flow.amount / Math.pow(1 + rate, days / 365); }, 0); }
-        var low = -0.99, high = 10, lowValue = npv(low), highValue = npv(high);
-        if (!isFinite(lowValue) || !isFinite(highValue) || lowValue * highValue > 0) return null;
-        for (var i = 0; i < 60; i++) { var mid = (low + high) / 2, value = npv(mid); if (Math.abs(value) < 0.01) return mid; if (lowValue * value <= 0) { high = mid; highValue = value; } else { low = mid; lowValue = value; } }
-        return (low + high) / 2;
-    }
-    function renderInvestmentPerformance(netWorth) {
-        var container = document.getElementById('investment-performance'); if (!container) return;
-        var m = getTransactionMetrics(); var base = m.totalBuy || 0; var returnRate = base > 0 ? (m.totalPnl / base) * 100 : null;
-        var history = (state.history || []).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
-        var snapshotReturn = (history.length >= 2 && history[0].netWorth > 0) ? ((history[history.length - 1].netWorth / history[0].netWorth) - 1) * 100 : null;
-        var flowRows = (state.transactions || []).filter(tx => tx.type === 'deposit' || tx.type === 'withdrawal').map(tx => ({ date: tx.date, amount: tx.type === 'deposit' ? -(parseFloat(tx.amount) || 0) : (parseFloat(tx.amount) || 0) }));
-        if (flowRows.length && netWorth > 0) flowRows.push({ date: getLocalDateString(), amount: netWorth });
-        var xirr = calculateXirr(flowRows);
-        var signed = val => (val >= 0 ? '+' : '-') + '$' + formatNum(Math.abs(val));
-        var rate = val => (val === null || !isFinite(val)) ? '--' : (val >= 0 ? '+' : '') + val.toFixed(1) + '%';
-        var pnlColor = m.totalPnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
-        container.innerHTML = [
-            ['累積淨損益', signed(m.totalPnl), pnlColor], ['已實現損益', signed(m.realized), m.realized >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'],
-            ['未實現損益', signed(m.unrealized), m.unrealized >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'], ['股息與利息淨額', signed(m.dividends - m.interest), 'var(--accent-cyan)'],
-            ['累積報酬率', rate(returnRate), returnRate !== null && returnRate >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'], ['投入本金淨額', '$' + formatNum(m.deposits - m.withdrawals), 'var(--accent-blue)'],
-            ['歷史快照成長', rate(snapshotReturn), snapshotReturn !== null && snapshotReturn >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'], ['XIRR 真實年化', rate(xirr === null ? null : xirr * 100), 'var(--accent-orange)']
-        ].map(item => `<div class="performance-stat"><div class="label">${item[0]}</div><div class="value blur-target" style="color:${item[2]};">${item[1]}</div></div>`).join('');
-    }
-    function renderTransactions() {
-        var list = document.getElementById('transaction-list'); if (!list) return;
-        var dateInput = document.getElementById('tx-date'); if (dateInput && !dateInput.value) dateInput.value = getLocalDateString();
-        changeTransactionFields();
-        var rows = (state.transactions || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)) || ((b.createdAt || 0) - (a.createdAt || 0)));
-        if (!rows.length) { list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:12px; padding:14px; border:1px dashed var(--border-color); border-radius:8px;">尚無交易紀錄。</div>'; renderInvestmentPerformance(parseFloat(document.getElementById('ui-net-worth')?.getAttribute('data-val')) || 0); return; }
-        list.innerHTML = rows.map(tx => { var meta = transactionTypes[tx.type] || transactionTypes.buy; var trading = tx.type === 'buy' || tx.type === 'sell'; var amount = trading ? (parseFloat(tx.quantity) || 0) * (parseFloat(tx.price) || 0) + (tx.type === 'buy' ? (parseFloat(tx.amount) || 0) : -(parseFloat(tx.amount) || 0)) : (parseFloat(tx.amount) || 0); return `<div class="ledger-row"><div class="ledger-meta">${escapeHTML(tx.date || '')}</div><div style="font-size:12px; color:${meta.color}; font-weight:800;">${meta.label}</div><div class="ledger-meta">${escapeHTML(tx.code || tx.name || '未命名')}${trading ? '<br>' + formatNum(tx.quantity) + '股 @$' + formatNum(tx.price) : ''}</div><div class="ledger-amount blur-target" style="color:${meta.color};">$${formatNum(amount)}</div><button class="btn-delete" onclick="deleteTransaction('${safeAttr(tx.id)}')"><i class="fa-solid fa-trash-can"></i></button></div>`; }).join('');
-        renderInvestmentPerformance(parseFloat(document.getElementById('ui-net-worth')?.getAttribute('data-val')) || 0);
-    }
-
     window.toggleCollateral = function(type, idx) { state[type][idx].isCollateral = !state[type][idx].isCollateral; saveData(); if (type === 'stocks') renderStocks(); else renderFunds(); updateTotals(); }
 
     function renderStocks() {
         var container = document.getElementById('stocks-container'); if(!container) return;
         if (!state.stocks || state.stocks.length === 0) { container.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:13px; padding:15px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">掃描無結果，陣列為空。</div>'; return; }
         var totalInvestment = getTotalStockValue();
-        container.innerHTML = state.stocks.map((stock, index) => { var stockValue = (parseFloat(stock.shares)||0) * (parseFloat(stock.price)||0); var allocation = totalInvestment > 0 ? (stockValue / totalInvestment) * 100 : 0; return `<div class="inventory-card"><div class="inv-header"><button class="btn-collateral ${stock.isCollateral ? 'active' : ''}" onclick="toggleCollateral('stocks', ${index})" title="設為質押擔保品"><i class="fa-solid fa-shield-halved"></i></button><input type="text" class="inv-input-text" data-type="stock" data-idx="${index}" data-field="broker" value="${safeAttr(stock.broker || '')}" placeholder="券商/備註"><input type="text" class="inv-input-code" data-type="stock" data-idx="${index}" data-field="code" value="${safeAttr(stock.code || '')}" placeholder="代碼"><select class="inv-select" data-type="stock" data-idx="${index}" data-field="mult"><option value="1" ${stock.mult==1?'selected':''}>1x</option><option value="1.5" ${stock.mult==1.5?'selected':''}>1.5x</option><option value="2" ${stock.mult==2?'selected':''}>2x</option><option value="3" ${stock.mult==3?'selected':''}>3x</option><option value="0" ${stock.mult==0?'selected':''}>0x</option></select><button class="btn-delete" onclick="removeStock(${index})"><i class="fa-solid fa-trash-can"></i></button></div><div class="inv-calc"><div style="display:flex; align-items:center; gap:5px;"><input type="number" class="inv-input-num blur-target" data-type="stock" data-idx="${index}" data-field="shares" value="${safeAttr(stock.shares)}"> 股 × <input type="number" class="inv-input-num" data-type="stock" data-idx="${index}" data-field="price" value="${safeAttr(stock.price)}"> 元</div><div style="display:flex; flex-direction:column; align-items:flex-end;"><div class="inv-value blur-target" id="stock-val-${index}">=$${formatNum(stockValue)}</div><div style="font-size:11px; color:var(--text-sub); font-weight:700;">佔比 <span id="stock-allocation-${index}" style="color:var(--accent-cyan);">${allocation.toFixed(1)}%</span></div></div></div></div>`; }).join('');
+        container.innerHTML = state.stocks.map((stock, index) => { var stockValue = (parseFloat(stock.shares)||0) * (parseFloat(stock.price)||0); var allocation = totalInvestment > 0 ? (stockValue / totalInvestment) * 100 : 0; return `<div class="inventory-card"><div class="inv-header"><button class="btn-collateral ${stock.isCollateral ? 'active' : ''}" onclick="toggleCollateral('stocks', ${index})" title="設為質押擔保品"><i class="fa-solid fa-shield-halved"></i></button><input type="text" class="inv-input-text" data-type="stock" data-idx="${index}" data-field="broker" value="${safeAttr(stock.broker || '')}" placeholder="券商/備註"><input type="text" class="inv-input-code" data-type="stock" data-idx="${index}" data-field="code" value="${safeAttr(stock.code || '')}" placeholder="代碼"><select class="inv-select" data-type="stock" data-idx="${index}" data-field="mult"><option value="1" ${stock.mult==1?'selected':''}>1x</option><option value="1.5" ${stock.mult==1.5?'selected':''}>1.5x</option><option value="2" ${stock.mult==2?'selected':''}>2x</option><option value="3" ${stock.mult==3?'selected':''}>3x</option><option value="0" ${stock.mult==0?'selected':''}>0x</option></select><button class="btn-delete" onclick="removeStock(${index})"><i class="fa-solid fa-trash-can"></i></button></div><div class="inv-calc"><div style="display:flex; align-items:center; gap:5px;"><input type="number" class="inv-input-num blur-target" data-type="stock" data-idx="${index}" data-field="shares" value="${safeAttr(stock.shares)}"> 股 × <input type="number" class="inv-input-num" data-type="stock" data-idx="${index}" data-field="price" value="${safeAttr(stock.price)}" step="any"> 元</div><div style="display:flex; flex-direction:column; align-items:flex-end;"><div class="inv-value blur-target" id="stock-val-${index}">=$${formatNum(stockValue)}</div><div style="font-size:11px; color:var(--text-sub); font-weight:700;">佔比 <span id="stock-allocation-${index}" style="color:var(--accent-cyan);">${allocation.toFixed(1)}%</span></div></div></div></div>`; }).join('');
         attachListListeners(container);
     }
 
@@ -1788,8 +1784,18 @@ self.addEventListener('fetch', e => {
     function renderFunds() {
         var container = document.getElementById('funds-container'); if(!container) return;
         if (!state.funds || state.funds.length === 0) { container.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:13px; padding:15px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">掃描無結果，陣列為空。</div>'; return; }
-        container.innerHTML = state.funds.map((fund, index) => `<div class="inventory-card"><div class="inv-header"><button class="btn-collateral ${fund.isCollateral ? 'active' : ''}" onclick="toggleCollateral('funds', ${index})" title="設為質押擔保品"><i class="fa-solid fa-shield-halved"></i></button><input type="text" class="inv-input-text" data-type="fund" data-idx="${index}" data-field="name" value="${safeAttr(fund.name || '')}" placeholder="基金/加密貨幣名稱"><select class="inv-select" data-type="fund" data-idx="${index}" data-field="mult"><option value="1" ${fund.mult==1?'selected':''}>1x</option><option value="1.5" ${fund.mult==1.5?'selected':''}>1.5x</option><option value="2" ${fund.mult==2?'selected':''}>2x</option><option value="3" ${fund.mult==3?'selected':''}>3x</option><option value="0" ${fund.mult==0?'selected':''}>0x</option></select><button class="btn-delete" onclick="removeFund(${index})"><i class="fa-solid fa-trash-can"></i></button></div><div class="inv-calc"><span>現值 (TWD)：</span> <div style="display:flex; align-items:center; gap:5px;">$ <input type="number" class="inv-input-num blur-target" style="width:125px;" data-type="fund" data-idx="${index}" data-field="value" value="${safeAttr(fund.value)}"></div></div></div>`).join('');
+        var totalFundVal = (state.funds || []).reduce((sum, f) => sum + (parseFloat(f.value) || 0), 0);
+        container.innerHTML = state.funds.map((fund, index) => { var fVal = parseFloat(fund.value) || 0; var fPct = totalFundVal > 0 ? (fVal / totalFundVal) * 100 : 0; return `<div class="inventory-card"><div class="inv-header"><button class="btn-collateral ${fund.isCollateral ? 'active' : ''}" onclick="toggleCollateral('funds', ${index})" title="設為質押擔保品"><i class="fa-solid fa-shield-halved"></i></button><input type="text" class="inv-input-text" data-type="fund" data-idx="${index}" data-field="name" value="${safeAttr(fund.name || '')}" placeholder="基金/加密貨幣名稱"><select class="inv-select" data-type="fund" data-idx="${index}" data-field="mult"><option value="1" ${fund.mult==1?'selected':''}>1x</option><option value="1.5" ${fund.mult==1.5?'selected':''}>1.5x</option><option value="2" ${fund.mult==2?'selected':''}>2x</option><option value="3" ${fund.mult==3?'selected':''}>3x</option><option value="0" ${fund.mult==0?'selected':''}>0x</option></select><button class="btn-delete" onclick="removeFund(${index})"><i class="fa-solid fa-trash-can"></i></button></div><div class="inv-calc"><span>現值 (TWD)：</span> <div style="display:flex; align-items:center; gap:8px;">$ <input type="number" class="inv-input-num blur-target" style="width:120px;" data-type="fund" data-idx="${index}" data-field="value" value="${safeAttr(fund.value)}" step="any"><span style="font-size:11px; color:var(--text-sub); font-weight:700;">佔比 <span id="fund-allocation-${index}" style="color:var(--accent-purple);">${fPct.toFixed(1)}%</span></span></div></div></div>`; }).join('');
         attachListListeners(container);
+    }
+
+    function updateFundAllocationLabels() {
+        var totalFundVal = (state.funds || []).reduce((sum, f) => sum + (parseFloat(f.value) || 0), 0);
+        (state.funds || []).forEach((fund, index) => {
+            var label = document.getElementById('fund-allocation-' + index); if (!label) return;
+            var val = parseFloat(fund.value) || 0;
+            label.innerText = (totalFundVal > 0 ? (val / totalFundVal) * 100 : 0).toFixed(1) + '%';
+        });
     }
 
     function attachListListeners(container) {
@@ -1806,33 +1812,6 @@ self.addEventListener('fetch', e => {
     function removeStock(idx) { if(confirm('卸載部位？')) { state.stocks.splice(idx, 1); renderStocks(); updateTotals(); } }
     function addFund() { state.funds.push({ id: 'f'+Date.now(), name: '', value: 0, mult: 1, isCollateral: false }); renderFunds(); updateTotals(); }
     function removeFund(idx) { if(confirm('卸載部位？')) { state.funds.splice(idx, 1); renderFunds(); updateTotals(); } }
-
-    async function fetchPrices() {
-        var btn = document.getElementById('btn-fetch'); if(!btn) return;
-        var originalText = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 對接中...'; btn.disabled = true;
-        try {
-            var uniqueCodes = [...new Set(state.stocks.map(s => ((s.code || '').trim()).toUpperCase()).filter(c => c !== ''))];
-            if(uniqueCodes.length === 0) { alert("⚠️ 請先輸入股票代碼。"); return; }
-            var successCount = 0; var priceMap = {};
-            try {
-                const controller = new AbortController(); const timeoutId = setTimeout(() => controller.abort(), 6000);
-                var [resTwse, resTpex] = await Promise.all([
-                    fetch('https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL', { signal: controller.signal }).catch(() => null),
-                    fetch('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes', { signal: controller.signal }).catch(() => null)
-                ]);
-                clearTimeout(timeoutId);
-                if (resTwse && resTwse.ok) { var twseData = await resTwse.json(); twseData.forEach(item => { var code = item.Code ? item.Code.trim() : null; var p = parseFloat((item.ClosingPrice || '').replace(/,/g, '')); if (code && p > 0) priceMap[code] = p; }); }
-                if (resTpex && resTpex.ok) { var tpexData = await resTpex.json(); tpexData.forEach(item => { var code = (item.SecuritiesCompanyCode || item.code || "").trim(); var p = parseFloat((item.Close || item.close || '').replace(/,/g, '')); if (code && p > 0) priceMap[code] = p; }); }
-                uniqueCodes.forEach(code => { if (priceMap[code]) { state.marketPrices[code] = priceMap[code]; successCount++; } });
-            } catch (e) {}
-
-            if (successCount > 0) {
-                state.stocks.forEach(stock => { var code = ((stock.code || '').trim()).toUpperCase(); if(state.marketPrices[code]) stock.price = state.marketPrices[code]; });
-                var now = new Date(); state.lastSyncTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-                renderStocks(); updateTotals(); alert(`✅ 對接成功！已同步 ${successCount} 檔標的。`);
-            } else { alert("⚠️ 股價未更新：請確認代碼或網路狀態。"); }
-        } finally { btn.innerHTML = originalText; btn.disabled = false; }
-    }
 
     function updateVixSignal(val) {
         var vix = parseFloat(val) || 0; state.vix = vix; var res = document.getElementById('vix-signal-result'); if (!res) return;
@@ -1933,16 +1912,136 @@ self.addEventListener('fetch', e => {
         container.style.display = 'block';
     }
 
+    /* =========================================================
+       🎮 戰術成就與微型任務渲染引擎
+       ========================================================= */
     function checkAndRenderQuests(netWorth, runwayMonths, debtRatio, ratioRaw) {
-        if (state.history.length > 0) state.achievements.first_blood = true;
-        if (netWorth >= 1000000) state.achievements.nw_1m = true;
-        if (netWorth >= 5000000) state.achievements.nw_5m = true;
-        if (runwayMonths >= 6) state.achievements.runway_6m = true;
-        if (debtRatio < 30 && debtRatio > 0) state.achievements.debt_light = true;
-        if (Math.abs(ratioRaw - state.effectiveTargetRatio) < 1.0 && netWorth > 0) state.achievements.perfect_exp = true;
+        if (!state.achievements) state.achievements = {};
+        var newUnlocks = [];
 
-        var bdgs = ['first','1m','5m','runway','debt','precise'], achs = ['first_blood','nw_1m','nw_5m','runway_6m','debt_light','perfect_exp'];
-        for(var i=0; i<bdgs.length; i++) { var b = document.getElementById('badge-' + bdgs[i]); if(b && state.achievements[achs[i]]) b.classList.add('unlocked'); }
+        if (state.history && state.history.length > 0 && !state.achievements.first_blood) {
+            state.achievements.first_blood = true;
+            newUnlocks.push('🌱 啟航者 (完成第一筆快照)');
+        }
+        if (netWorth >= 1000000 && !state.achievements.nw_1m) {
+            state.achievements.nw_1m = true;
+            newUnlocks.push('💰 百萬將鋒 (淨資產突破 100 萬)');
+        }
+        if (netWorth >= 5000000 && !state.achievements.nw_5m) {
+            state.achievements.nw_5m = true;
+            newUnlocks.push('🚀 半息巡航 (淨資產突破 500 萬)');
+        }
+        if (runwayMonths >= 6 && !state.achievements.runway_6m) {
+            state.achievements.runway_6m = true;
+            newUnlocks.push('🛡️ 防禦大師 (活水防禦破 6 個月)');
+        }
+        if (debtRatio < 30 && debtRatio > 0 && !state.achievements.debt_light) {
+            state.achievements.debt_light = true;
+            newUnlocks.push('🪶 無重力 (總負債比降至 30% 以下)');
+        }
+
+        var isPerfectExp = Math.abs(ratioRaw - state.effectiveTargetRatio) < 1.0;
+        var hasAssets = (state.stocks.length > 0 || state.funds.length > 0) && netWorth > 0;
+        if (hasAssets && isPerfectExp && !state.achievements.perfect_exp) {
+            state.achievements.perfect_exp = true;
+            newUnlocks.push('⚖️ 絕對精準 (實際曝險與目標誤差 < 1%)');
+        }
+
+        if (isAppReady && newUnlocks.length > 0) {
+            triggerConfetti();
+            setTimeout(() => { alert("🎉 恭喜指揮官！解鎖新成就：\n\n" + newUnlocks.join("\n")); }, 400);
+        }
+
+        var bdgs = ['first','1m','5m','runway','debt','precise'];
+        var achs = ['first_blood','nw_1m','nw_5m','runway_6m','debt_light','perfect_exp'];
+        for(var i = 0; i < bdgs.length; i++) {
+            var b = document.getElementById('badge-' + bdgs[i]);
+            if(b) {
+                if (state.achievements[achs[i]]) b.classList.add('unlocked');
+                else b.classList.remove('unlocked');
+            }
+        }
+
+        var nextMilestone = 100000;
+        if (netWorth >= 10000000) nextMilestone = 50000000;
+        else if (netWorth >= 5000000) nextMilestone = 10000000;
+        else if (netWorth >= 3000000) nextMilestone = 5000000;
+        else if (netWorth >= 1000000) nextMilestone = 3000000;
+        else if (netWorth >= 500000) nextMilestone = 1000000;
+        else if (netWorth >= 100000) nextMilestone = 500000;
+
+        var mainPct = Math.min(100, Math.max(0, (netWorth / nextMilestone) * 100));
+        var uiMainQuest = document.getElementById('ui-current-main-quest');
+        if (uiMainQuest) {
+            uiMainQuest.innerHTML = `
+                <div style="font-size:13px; font-weight:800; color:var(--accent-orange); margin-bottom:6px;">
+                    <i class="fa-solid fa-flag-checkered"></i> [主線] 晉升階級：淨資產突破 $${formatNum(nextMilestone)}
+                </div>
+                <div style="font-size:11px; color:var(--text-sub); margin-bottom:6px;">
+                    目前進度：$${formatNum(netWorth)} / $${formatNum(nextMilestone)} (${mainPct.toFixed(1)}%)
+                </div>
+                <div class="vs-bar-container" style="height:8px; margin:0; background:var(--input-bg);">
+                    <div style="background:var(--accent-orange); height:100%; width:${mainPct}%; transition: width 0.5s ease; box-shadow: 0 0 10px rgba(251,191,36,0.5);"></div>
+                </div>
+            `;
+        }
+
+        var sideQuestsHTML = '';
+        var q1Pct = Math.min(100, Math.max(0, (runwayMonths / 6) * 100));
+        var q1Status = runwayMonths >= 6 ? 'completed' : '';
+        var q1Icon = runwayMonths >= 6 ? '<i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i>' : '<i class="fa-regular fa-circle" style="color:var(--text-sub);"></i>';
+        sideQuestsHTML += `
+            <div class="quest-card ${q1Status}">
+                <div class="quest-title">
+                    <span>${q1Icon} 銅牆鐵壁</span>
+                    <span style="font-size:12px; font-weight:700; color:${runwayMonths >= 6 ? 'var(--accent-green)' : 'var(--text-sub)'};">${runwayMonths > 99 ? 'MAX' : runwayMonths.toFixed(1)} / 6.0 個月</span>
+                </div>
+                <div class="quest-desc">將活水續航力提升至 6 個月以上，獲得「防禦大師」徽章。</div>
+                <div class="vs-bar-container" style="height:4px; margin:0; border:none; background:rgba(255,255,255,0.1);">
+                    <div style="background:var(--accent-green); height:100%; width:${q1Pct}%;"></div>
+                </div>
+            </div>
+        `;
+
+        var q2Done = (debtRatio < 30 && debtRatio > 0);
+        var q2Pct = debtRatio <= 0 ? 0 : (debtRatio >= 100 ? 0 : Math.min(100, Math.max(0, (100 - debtRatio) / (100 - 30) * 100)));
+        if (q2Done) q2Pct = 100;
+        var q2Status = q2Done ? 'completed' : '';
+        var q2Icon = q2Done ? '<i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i>' : '<i class="fa-regular fa-circle" style="color:var(--text-sub);"></i>';
+        sideQuestsHTML += `
+            <div class="quest-card ${q2Status}">
+                <div class="quest-title">
+                    <span>${q2Icon} 擺脫重力</span>
+                    <span style="font-size:12px; font-weight:700; color:${q2Done ? 'var(--accent-green)' : 'var(--text-sub)'};">${debtRatio.toFixed(1)}% / &lt; 30%</span>
+                </div>
+                <div class="quest-desc">在保有借貸槓桿的前提下，將總負債比壓縮至 30% 以下。</div>
+                <div class="vs-bar-container" style="height:4px; margin:0; border:none; background:rgba(255,255,255,0.1);">
+                    <div style="background:var(--accent-blue); height:100%; width:${q2Pct}%;"></div>
+                </div>
+            </div>
+        `;
+
+        var expDiff = Math.abs(ratioRaw - state.effectiveTargetRatio);
+        var q3Done = isPerfectExp && hasAssets;
+        var q3Pct = hasAssets ? Math.min(100, Math.max(0, 100 - (expDiff * 5))) : 0;
+        if (q3Done) q3Pct = 100;
+        var q3Status = q3Done ? 'completed' : '';
+        var q3Icon = q3Done ? '<i class="fa-solid fa-circle-check" style="color:var(--accent-green);"></i>' : '<i class="fa-regular fa-circle" style="color:var(--text-sub);"></i>';
+        sideQuestsHTML += `
+            <div class="quest-card ${q3Status}">
+                <div class="quest-title">
+                    <span>${q3Icon} 精準操盤</span>
+                    <span style="font-size:12px; font-weight:700; color:${q3Done ? 'var(--accent-green)' : 'var(--text-sub)'};">誤差 ${expDiff.toFixed(1)}%</span>
+                </div>
+                <div class="quest-desc">完美執行再平衡，使實際曝險與目標曝險誤差小於 1%。</div>
+                <div class="vs-bar-container" style="height:4px; margin:0; border:none; background:rgba(255,255,255,0.1);">
+                    <div style="background:var(--accent-purple); height:100%; width:${q3Pct}%;"></div>
+                </div>
+            </div>
+        `;
+
+        var uiSideQuests = document.getElementById('ui-side-quests');
+        if (uiSideQuests) uiSideQuests.innerHTML = sideQuestsHTML;
     }
 
     function renderRebalanceWidget(totalCash, totalInv) {
@@ -1974,6 +2073,7 @@ self.addEventListener('fetch', e => {
         state.stocks.forEach(s => { var val = (parseFloat(s.shares) || 0) * (parseFloat(s.price) || 0), mult = s.mult !== undefined ? parseFloat(s.mult) : 1; totalInv += val; totalExp += (val * mult); if(mult >= 1.5) v2x += val * mult; else if(mult > 0) v1x += val * mult; else v0x += val; if (s.isCollateral) collateralTotal += val; else unpledgedStockVal += val; });
         state.funds.forEach(f => { var val = parseFloat(f.value) || 0, mult = f.mult !== undefined ? parseFloat(f.mult) : 1; totalInv += val; totalExp += (val * mult); if(mult >= 1.5) v2x += val * mult; else if(mult > 0) v1x += val * mult; else v0x += val; if (f.isCollateral) collateralTotal += val; });
         updateStockAllocationLabels(getTotalStockValue());
+        updateFundAllocationLabels();
         var colEl = document.getElementById('input-collateral'); if(colEl) colEl.value = Math.round(collateralTotal);
 
         var netWorth = (totalInv + totalCashSum) - totalDebt, ratioRaw = netWorth > 0 ? (totalExp / netWorth) * 100 : 0;
@@ -2006,7 +2106,6 @@ self.addEventListener('fetch', e => {
             else { marginEl.innerText = marginRatio.toFixed(1) + "%"; var dropToMarginCall = marginRatio > 130 ? (1 - (1.3 * totalPledgeSum / collateralTotal)) * 100 : 0; document.getElementById('ui-margin-drop').innerText = dropToMarginCall > 0 ? "-" + dropToMarginCall.toFixed(1) + "%" : "已達追繳線"; }
         }
 
-        /* 壓力測試與新增的「維持率護盾救援計算機」 */
         var stressPct = parseInt(document.getElementById('stress-slider').value) / 100;
         var newCollateral = collateralTotal * (1 - stressPct);
         var stressedMargin = totalPledgeSum > 0 ? (newCollateral / totalPledgeSum) * 100 : 999;
@@ -2055,7 +2154,7 @@ self.addEventListener('fetch', e => {
         }
 
         runSniperDCA();
-        debouncedHeavyUpdate(v1x, v2x, totalCashSum, v0x, netWorth);
+        debouncedHeavyUpdate(v1x, v2x, totalCashSum, v0x);
     }
 
     function updateSimulator(netWorth, totalExp, currentPct) {
@@ -2070,15 +2169,56 @@ self.addEventListener('fetch', e => {
         res.innerHTML = `<div style="text-align:center; font-weight:800; color:${gap > 0 ? 'var(--accent-blue)' : 'var(--accent-red)'};">💡 曝險缺口 $${formatNum(Math.abs(gap))}：建議${gap > 0 ? '買進' : '賣出'} 2X 槓桿 ETF 約 $${formatNum(Math.abs(gap/2))}</div>`;
     }
 
+    /* =========================================================
+       V17.3 強化版：正規化歸戶與四大圓餅圖右側百分比明細同步更新
+       ========================================================= */
     function updateSubCharts() {
         try {
-            var groupedStocks = {}, groupedFunds = {}, leverageValues = [0, 0];
-            state.stocks.forEach(s => { var code = s.code || '未命名', val = (parseFloat(s.shares)||0) * (parseFloat(s.price)||0), mult = parseFloat(s.mult)||1; if(val>0){ groupedStocks[code] = (groupedStocks[code]||0) + val; if (mult === 1) leverageValues[0] += val; else if (mult >= 1.5) leverageValues[1] += val; }});
-            state.funds.forEach(f => { var name = f.name || '未命名', val = parseFloat(f.value)||0; if(val>0) groupedFunds[name] = (groupedFunds[name]||0) + val; });
-            if (charts.stock) { charts.stock.data.labels = Object.keys(groupedStocks); charts.stock.data.datasets[0].data = Object.values(groupedStocks); charts.stock.update('none'); }
-            if (charts.leverage) { charts.leverage.data.datasets[0].data = leverageValues; charts.leverage.update('none'); }
-            if (charts.fund) { charts.fund.data.labels = Object.keys(groupedFunds); charts.fund.data.datasets[0].data = Object.values(groupedFunds); charts.fund.update('none'); }
-        } catch(e) {}
+            var groupedStocks = {}, groupedFunds = {}, leverageValues = [0, 0, 0];
+            state.stocks.forEach(function(s) {
+                var code = (s.code || '').trim().toUpperCase() || '未命名台股';
+                var val = (parseFloat(s.shares) || 0) * (parseFloat(s.price) || 0);
+                var mult = s.mult !== undefined ? parseFloat(s.mult) : 1;
+                if (val > 0) {
+                    groupedStocks[code] = (groupedStocks[code] || 0) + val;
+                    if (mult === 1) leverageValues[0] += val;
+                    else if (mult >= 1.5) leverageValues[1] += val;
+                    else leverageValues[2] += val;
+                }
+            });
+            state.funds.forEach(function(f) {
+                var name = (f.name || '').trim() || '未命名資產';
+                var val = parseFloat(f.value) || 0;
+                if (val > 0) groupedFunds[name] = (groupedFunds[name] || 0) + val;
+            });
+
+            var stockLabels = Object.keys(groupedStocks), stockVals = Object.values(groupedStocks);
+            if (charts.stock) {
+                charts.stock.data.labels = stockLabels;
+                charts.stock.data.datasets[0].data = stockVals;
+                charts.stock.update('none');
+            }
+            renderPctBreakdownList('stock-pct-list', stockLabels, stockVals, chartPalette, '尚無台股持倉');
+
+            var levLabels = ['1X 原型部位', '1.5X~3X 槓桿', '0X 防禦部位'];
+            var levColors = ['#34d399', '#ec4899', '#38bdf8'];
+            if (charts.leverage) {
+                charts.leverage.data.labels = levLabels;
+                charts.leverage.data.datasets[0].data = leverageValues;
+                charts.leverage.update('none');
+            }
+            renderPctBreakdownList('leverage-pct-list', levLabels, leverageValues, levColors, '尚無槓桿配置數據');
+
+            var fundLabels = Object.keys(groupedFunds), fundVals = Object.values(groupedFunds);
+            if (charts.fund) {
+                charts.fund.data.labels = fundLabels;
+                charts.fund.data.datasets[0].data = fundVals;
+                charts.fund.update('none');
+            }
+            renderPctBreakdownList('fund-pct-list', fundLabels, fundVals, chartPalette, '尚無基金或海外資產');
+        } catch(e) {
+            console.error('子圖表更新失敗:', e);
+        }
     }
 
     function updateStateValue(key, val) { state[key] = parseFloat(val) || 0; updateTotals(); }
@@ -2089,14 +2229,57 @@ self.addEventListener('fetch', e => {
     function initCharts() {
         if (typeof Chart === 'undefined') return;
         Chart.defaults.color = '#94a3b8';
-        var commonOpts = { responsive: true, maintainAspectRatio: false, cutout: '65%' };
-        charts.radar = new Chart(document.getElementById('radarChart').getContext('2d'), { type: 'doughnut', data: { labels: ['1X 推進', '2X+ 實質曝險', '防禦活水'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#34d399', '#ec4899', '#38bdf8'], borderWidth: 0 }] }, options: commonOpts });
-        charts.stock = new Chart(document.getElementById('stockChart').getContext('2d'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: chartPalette, borderWidth: 0 }] }, options: commonOpts });
-        charts.leverage = new Chart(document.getElementById('leverageChart').getContext('2d'), { type: 'doughnut', data: { labels: ['1X 原型', '2X+ 槓桿'], datasets: [{ data: [0, 0], backgroundColor: ['#34d399', '#ec4899'], borderWidth: 0 }] }, options: commonOpts });
-        charts.fund = new Chart(document.getElementById('fundChart').getContext('2d'), { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: chartPalette, borderWidth: 0 }] }, options: commonOpts });
-        charts.history = new Chart(document.getElementById('historyChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: '淨資產', data: [], borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.1)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+        var tooltipOpt = {
+            backgroundColor: 'rgba(15, 23, 42, 0.94)', titleColor: '#38bdf8', bodyColor: '#f8fafc', borderColor: 'rgba(56, 189, 248, 0.35)', borderWidth: 1, padding: 10, cornerRadius: 8,
+            callbacks: {
+                label: function(context) {
+                    var data = context.dataset.data || [];
+                    var total = data.reduce((sum, val, i) => sum + (context.chart.getDataVisibility(i) ? (parseFloat(val) || 0) : 0), 0);
+                    var value = parseFloat(context.parsed) || 0;
+                    var pct = total > 0 ? (value / total) * 100 : 0;
+                    return ' ' + context.label + ': $' + formatNum(value) + ' (' + pct.toFixed(1) + '%)';
+                }
+            }
+        };
 
-        // 綁定 ResizeObserver 確保 12 欄 Grid 切換時圖表零延遲自適應
+        // 採用左圖右表（.chart-split-layout），關閉 Canvas 內部擁擠的 Legend，交給右側高質感 HTML 百分比明細列呈現
+        var cleanDoughnutOpts = {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '66%',
+            plugins: {
+                legend: { display: false },
+                tooltip: tooltipOpt
+            },
+            layout: { padding: 4 }
+        };
+
+        charts.radar = new Chart(document.getElementById('radarChart').getContext('2d'), {
+            type: 'doughnut',
+            data: { labels: ['1X 平穩推進', '2X+ 實質曝險', '防禦活水庫存'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#34d399', '#ec4899', '#38bdf8'], borderWidth: 0, hoverOffset: 6 }] },
+            options: cleanDoughnutOpts
+        });
+        charts.stock = new Chart(document.getElementById('stockChart').getContext('2d'), {
+            type: 'doughnut',
+            data: { labels: [], datasets: [{ data: [], backgroundColor: chartPalette, borderWidth: 0, hoverOffset: 6 }] },
+            options: cleanDoughnutOpts
+        });
+        charts.leverage = new Chart(document.getElementById('leverageChart').getContext('2d'), {
+            type: 'doughnut',
+            data: { labels: ['1X 原型部位', '1.5X~3X 槓桿', '0X 防禦部位'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#34d399', '#ec4899', '#38bdf8'], borderWidth: 0, hoverOffset: 6 }] },
+            options: cleanDoughnutOpts
+        });
+        charts.fund = new Chart(document.getElementById('fundChart').getContext('2d'), {
+            type: 'doughnut',
+            data: { labels: [], datasets: [{ data: [], backgroundColor: chartPalette, borderWidth: 0, hoverOffset: 6 }] },
+            options: cleanDoughnutOpts
+        });
+        charts.history = new Chart(document.getElementById('historyChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: '淨資產', data: [], borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.1)', fill: true, tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tooltipOpt } }
+        });
+
         if (typeof ResizeObserver !== 'undefined') {
             var ro = new ResizeObserver(() => resizeAllCharts());
             var wrContainer = document.getElementById('war-room-container');
@@ -2112,7 +2295,6 @@ self.addEventListener('fetch', e => {
         renderStocks();
         renderFunds();
         renderDetailsPage();
-        renderTransactions();
         renderNotes();
         renderSnapshots();
         renderTacticsWidgets();
