@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="曝險雷達">
-    <title>曝險雷達 V17.4 · 清晰檢視</title>
+    <title>曝險雷達 V17.5 · 清晰檢視</title>
     <!-- 外部 CDN 載入 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -488,7 +488,7 @@
 
 <div class="app-container">
     <div class="header">
-        <div>📈 終極曝險雷達 <span style="font-size:11px; color:var(--accent-cyan); font-weight:700;">V17.4</span></div>
+        <div>📈 終極曝險雷達 <span style="font-size:11px; color:var(--accent-cyan); font-weight:700;">V17.5</span></div>
         <div class="header-actions">
             <button id="btn-pwa-install" class="shield-toggle-btn" style="color:var(--accent-green); border-color:var(--accent-green); display:none;" onclick="installPWA()"><i class="fa-solid fa-mobile-screen-button"></i> 安裝 App</button>
             <button id="btn-sandbox" class="shield-toggle-btn" style="color:var(--accent-purple); border-color:var(--accent-purple);" onclick="toggleSandbox()"><i class="fa-solid fa-flask"></i> 平行沙盤</button>
@@ -1031,7 +1031,7 @@
                     <div class="section-title" style="color:var(--accent-blue);">📱 PWA 離線桌面化封裝中樞</div>
                 </div>
                 <p style="font-size:12px; color:var(--text-sub); line-height:1.5; margin-bottom:12px;">
-                    本系統已內建動態 Manifest。若您將此 HTML 部署至 <b>GitHub Pages</b>，請點擊下方按鈕下載實體 <code>sw.js</code> 與 <code>manifest.json</code> 並放於同資料夾，即可解鎖手機/桌面「安裝 App」與 100% 離線秒開能力！
+                    部署至 <b>GitHub Pages</b> 後，下載並覆蓋同資料夾內的 <code>sw.js</code> 與 <code>manifest.json</code>，HTML 檔名請維持下載這兩個檔案時的名稱。新版只快取網站檔案，GAS 與行情 API 一律直接連線，避免讀到舊資料；離線時仍可開啟已快取的網頁，但無法同步或更新行情。
                 </p>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button class="btn-add" style="flex:1;" onclick="downloadPWAFile('manifest')"><i class="fa-solid fa-file-code"></i> 下載 manifest.json</button>
@@ -1183,7 +1183,7 @@
         </div>
     </div>
 
-    <div class="footer">曝險雷達 V17.4<br><span style="font-size:11px; opacity:0.7;">簡潔與詳細檢視 · 本機備份與雲端同步</span></div>
+    <div class="footer">曝險雷達 V17.5<br><span style="font-size:11px; opacity:0.7;">簡潔與詳細檢視 · 本機備份與雲端同步</span></div>
 </div>
 
 <div class="fab-container" id="ui-fab-container">
@@ -1326,12 +1326,17 @@ function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
     var pwaIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#0a0f1d"/><circle cx="256" cy="256" r="190" fill="none" stroke="#38bdf8" stroke-width="16" stroke-dasharray="30 15"/><circle cx="256" cy="256" r="120" fill="none" stroke="#c084fc" stroke-width="12" opacity="0.7"/><path d="M256 256 L390 122" stroke="#34d399" stroke-width="18" stroke-linecap="round"/><circle cx="256" cy="256" r="24" fill="#38bdf8"/></svg>`;
     var pwaIconDataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(pwaIconSvg);
 
+    function getAppPagePath() {
+        var pageName = decodeURIComponent(location.pathname.split('/').pop() || 'index.html');
+        return './' + encodeURIComponent(pageName);
+    }
+
     function getManifestObject() {
         return {
-            name: "曝險雷達 V17.4",
+            name: "曝險雷達 V17.5",
             short_name: "曝險雷達",
             description: "終身財富規劃與極限曝險雷達戰情室",
-            start_url: "./index.html",
+            start_url: getAppPagePath(),
             display: "standalone",
             background_color: "#0a0f1d",
             theme_color: "#0a0f1d",
@@ -1379,34 +1384,70 @@ function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
             filename = "manifest.json";
         } else {
             filename = "sw.js";
-            content = `const CACHE_NAME = 'exposure-radar-v17-4-cache';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
+            content = `const CACHE_NAME = 'exposure-radar-v17-5-cache';
+const CACHE_PREFIX = 'exposure-radar-';
+const APP_PAGE = './${encodeURIComponent(decodeURIComponent(location.pathname.split('/').pop() || 'index.html'))}';
+const APP_SHELL = [APP_PAGE, './manifest.json'];
+const STATIC_CDN_ASSETS = [
   'https://cdn.jsdelivr.net/npm/chart.js',
   'https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
-self.addEventListener('install', e => {
-  self.skipWaiting();
-  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
+
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll(APP_SHELL);
+    await Promise.all(STATIC_CDN_ASSETS.map(url =>
+      cache.add(new Request(url, { cache: 'reload' })).catch(() => null)
+    ));
+    await self.skipWaiting();
+  })());
 });
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))));
+
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys
+      .filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+      .map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      const networked = fetch(e.request).then(res => {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-        return res;
-      }).catch(() => cached);
-      return cached || networked;
-    })
-  );
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+  const sameOrigin = url.origin === self.location.origin;
+  const isAppNavigation = sameOrigin && request.mode === 'navigate';
+  const isManifest = sameOrigin && url.pathname.endsWith('/manifest.json');
+  const isStaticCdnAsset = STATIC_CDN_ASSETS.includes(url.href);
+
+  // GAS、交易所、Yahoo 與其他動態／跨網域請求完全略過 SW，直接由網路回應。
+  if (!isAppNavigation && !isManifest && !isStaticCdnAsset) return;
+
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    try {
+      // Network first: 有網路時永遠取最新頁面或靜態 CDN 檔案。
+      const response = await fetch(request, { cache: 'no-store' });
+      if (response.ok && (response.type === 'basic' || response.type === 'cors')) {
+        await cache.put(request, response.clone());
+      }
+      return response;
+    } catch (error) {
+      // 只有網路失敗時才回退到快取，支援離線開啟網站外殼。
+      const cached = await cache.match(request);
+      if (cached) return cached;
+      if (isAppNavigation) {
+        const fallback = await cache.match(new URL(APP_PAGE, self.registration.scope).href);
+        if (fallback) return fallback;
+      }
+      throw error;
+    }
+  })());
 });`;
         }
         var blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -1794,9 +1835,9 @@ self.addEventListener('fetch', e => {
     }
 
     function exportToFile() {
-        var exportState = Object.assign({}, state, { backupVersion: 'v17.4-visual-refresh', exportedAt: new Date().toISOString() });
+        var exportState = Object.assign({}, state, { backupVersion: 'v17.5-pwa-network-first', exportedAt: new Date().toISOString() });
         var blob = new Blob([JSON.stringify(exportState, null, 2)], { type: "application/json" }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = `exposure_backup_v17_4_${getLocalDateString()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        a.download = `exposure_backup_v17_5_${getLocalDateString()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
     
     function importFromFile(event) {
