@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="曝險雷達">
-    <title>終極版曝險雷達 (V17.3 逐項百分比視覺強化 & PWA 旗艦版)</title>
+    <title>曝險雷達 V17.4 · 清晰檢視</title>
     <!-- 外部 CDN 載入 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -29,16 +29,17 @@
             --accent-purple: #c084fc;    
             --accent-pink: #ec4899;      
             --accent-cyan: #22d3ee;
+            --status-safe: #34d399;
+            --status-watch: #fbbf24;
+            --status-alert: #f87171;
+            --status-info: #38bdf8;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
         body { 
             background-color: var(--bg-body); 
-            background-image: 
-                radial-gradient(circle at 15% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 40%), 
-                radial-gradient(circle at 85% 100%, rgba(192, 132, 252, 0.06) 0%, transparent 40%);
-            background-attachment: fixed; color: var(--text-main); padding-bottom: 90px; transition: background-color 0.3s; overflow-x: hidden;
+            color: var(--text-main); padding-bottom: 90px; overflow-x: hidden;
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -202,7 +203,7 @@
         .pct-badge-val {
             font-size: 13px;
             font-weight: 900;
-            color: var(--accent-cyan);
+            color: var(--text-main);
         }
         .pct-amt-val {
             font-size: 11px;
@@ -211,7 +212,7 @@
         }
         .pct-mini-bar-bg {
             width: 100%;
-            height: 4px;
+            height: 6px;
             background: rgba(255, 255, 255, 0.07);
             border-radius: 3px;
             overflow: hidden;
@@ -219,7 +220,7 @@
         .pct-mini-bar-fill {
             height: 100%;
             border-radius: 3px;
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 0.2s ease-out;
         }
         @media (max-width: 400px) {
             .chart-split-layout {
@@ -236,15 +237,15 @@
 
         @keyframes pulse-red { 0% { box-shadow: 0 0 10px rgba(248,113,113,0.2); border-color: rgba(248,113,113,0.4); } 50% { box-shadow: 0 0 25px rgba(248,113,113,0.6); border-color: rgba(248,113,113,0.8); } 100% { box-shadow: 0 0 10px rgba(248,113,113,0.2); border-color: rgba(248,113,113,0.4); } }
         @keyframes pulse-orange { 0% { box-shadow: 0 0 10px rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.2); } 50% { box-shadow: 0 0 20px rgba(251,191,36,0.4); border-color: rgba(251,191,36,0.5); } 100% { box-shadow: 0 0 10px rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.2); } }
-        body.defcon-1 .glow-card { animation: pulse-red 2.5s infinite; }
-        body.defcon-3 .glow-card { animation: pulse-orange 3.5s infinite; }
+        body.defcon-1 .glow-card { border-color: var(--status-alert); box-shadow: 0 0 0 1px rgba(248,113,113,0.16); }
+        body.defcon-3 .glow-card { border-color: var(--status-watch); box-shadow: 0 0 0 1px rgba(251,191,36,0.14); }
 
         .underwater-box { background: linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,58,138,0.9) 100%); backdrop-filter: blur(8px); border: 1px solid #3b82f6; border-radius: 12px; padding: 15px; margin-top: 15px; color: #93c5fd; position: relative; overflow: hidden; display: none; }
         .underwater-box::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#38bdf8; box-shadow: 0 0 10px #38bdf8; }
         .water-bubble { position: absolute; background: rgba(56, 189, 248, 0.3); border-radius: 50%; animation: floatUp 4s infinite ease-in; }
         @keyframes floatUp { 0% { bottom: -10px; transform: translateX(0); opacity: 1; } 100% { bottom: 100%; transform: translateX(-20px); opacity: 0; } }
 
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 15px 10px 15px; color: var(--accent-blue); font-size: 15px; font-weight: 800; letter-spacing: 1px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); flex-wrap: wrap; gap: 10px;}
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 15px 10px 15px; color: var(--accent-blue); font-size: 15px; font-weight: 800; letter-spacing: 0; flex-wrap: wrap; gap: 10px;}
         .header-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
         .nav-wrapper { position: sticky; top: 0; z-index: 100; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); overflow-x: auto; white-space: nowrap; padding: 10px 15px; -webkit-overflow-scrolling: touch; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
@@ -252,20 +253,38 @@
         .nav-tabs { display: flex; gap: 10px; }
         .nav-tab { padding: 10px 18px; border-radius: 24px; font-size: 14px; font-weight: 600; color: var(--text-sub); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background-color: var(--input-bg); border: 1px solid var(--border-color); display: inline-flex; align-items: center; }
         .nav-tab:hover { background-color: rgba(255,255,255,0.05); color: var(--text-main); }
-        .nav-tab.active { background-color: rgba(56, 189, 248, 0.1); color: var(--accent-blue); box-shadow: 0 0 15px rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.5);}
+        .nav-tab.active { background-color: rgba(56, 189, 248, 0.1); color: var(--accent-blue); border-color: rgba(56, 189, 248, 0.5);}
         .nav-tab i { margin-right: 6px; font-size: 13px; }
 
         .tab-content { display: none; padding: 0 15px; }
-        .tab-content.active { display: block; animation: fadeIn 0.35s ease; }
+        .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card { background-color: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 18px; box-shadow: 0 8px 30px var(--card-shadow); border: 1px solid var(--border-color); transition: box-shadow 0.3s ease; min-width: 0; }
-        .card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.8); }
+        .card { background-color: var(--card-bg); border-radius: 14px; padding: 20px; margin-bottom: 18px; box-shadow: 0 3px 12px rgba(0,0,0,0.22); border: 1px solid var(--border-color); min-width: 0; }
+        .card:hover { border-color: rgba(148,163,184,0.4); }
         
         .exposure-display { text-align: center; padding: 5px 0 15px 0; position: relative;}
         .exposure-title { font-size: 14px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase;}
         .status-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 13px; margin-top: 8px; font-weight: 800; border: 1px solid transparent;}
-        .exposure-num { font-size: 54px; font-weight: 900; color: var(--text-main); letter-spacing: -1px; margin-top: 2px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);}
+        .exposure-num { font-size: 54px; font-weight: 900; color: var(--text-main); margin-top: 2px; }
+        .risk-status { display:inline-flex; align-items:center; gap:5px; border:1px solid currentColor; border-radius:999px; padding:4px 10px; font-size:12px; line-height:1.2; font-weight:800; }
+        .risk-status.status-safe { color:var(--status-safe); background:rgba(52,211,153,0.08); }
+        .risk-status.status-watch { color:var(--status-watch); background:rgba(251,191,36,0.08); }
+        .risk-status.status-alert { color:var(--status-alert); background:rgba(248,113,113,0.08); }
+        .risk-status.status-info { color:var(--status-info); background:rgba(56,189,248,0.08); }
+        .risk-value.status-safe { color:var(--status-safe) !important; }
+        .risk-value.status-watch { color:var(--status-watch) !important; }
+        .risk-value.status-alert { color:var(--status-alert) !important; }
+        .risk-context { margin-top:7px; color:var(--text-sub); font-size:11px; line-height:1.45; }
+        .display-mode-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 15px 12px; }
+        .display-mode-label { color:var(--text-sub); font-size:12px; font-weight:700; }
+        .display-mode-switch { display:inline-flex; gap:3px; padding:3px; border:1px solid var(--border-color); border-radius:9px; background:var(--input-bg); }
+        .display-mode-switch button { min-height:32px; padding:6px 12px; border:0; border-radius:6px; background:transparent; color:var(--text-sub); font-size:12px; font-weight:800; cursor:pointer; }
+        .display-mode-switch button[aria-pressed="true"] { background:#334155; color:var(--text-main); }
+        .display-mode-help { color:var(--text-sub); font-size:11px; text-align:right; }
+        body.simple-view .advanced-nav, body.simple-view .advanced-only { display:none !important; }
+        body.simple-view #fleet-container { display:none !important; }
+        body.detailed-view .pct-legend-list { max-height:360px; }
         
         .summary-table { width: 100%; margin-top: 10px; }
         .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed rgba(255,255,255,0.06);}
@@ -277,19 +296,25 @@
         
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 8px; }
         .section-title { font-size: 16px; color: var(--text-main); font-weight: 800; display: flex; align-items: center; letter-spacing: 0.5px;}
-        .section-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background-color: var(--accent-blue); margin-right: 8px; border-radius: 2px; box-shadow: 0 0 8px var(--accent-blue);}
+        .section-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background-color: var(--accent-blue); margin-right: 8px; border-radius: 2px; }
         
         .btn-add { background-color: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); padding: 8px 14px; border-radius: 10px; font-size: 13px; cursor: pointer; font-weight: 700; transition: all 0.2s;}
         .btn-add:hover { background-color: rgba(56, 189, 248, 0.25); color: #fff; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+        .btn-refresh { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:34px; padding:7px 12px; border:1px solid rgba(56,189,248,0.32); border-radius:10px; background:rgba(56,189,248,0.1); color:var(--accent-blue); font-size:13px; font-weight:700; cursor:pointer; transition:background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s; }
+        .btn-refresh:hover { background:rgba(56,189,248,0.18); border-color:rgba(56,189,248,0.55); color:var(--text-main); }
+        .btn-refresh:active { transform:translateY(1px); }
+        .btn-refresh:focus-visible { outline:2px solid var(--status-info); outline-offset:2px; }
+        .btn-refresh:disabled { opacity:0.65; cursor:wait; }
+        .btn-refresh i { font-size:12px; }
         
-        .btn-action { background-color: var(--accent-blue); color: #0f172a; border: none; padding: 13px 16px; border-radius: 14px; font-size: 15px; cursor: pointer; font-weight: 800; width: 100%; margin-top: 10px; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); transition: all 0.25s;}
-        .btn-action:hover { filter: brightness(1.1); box-shadow: 0 0 25px rgba(56, 189, 248, 0.4); }
+        .btn-action { background-color: var(--accent-blue); color: #0f172a; border: none; padding: 13px 16px; border-radius: 10px; font-size: 15px; cursor: pointer; font-weight: 800; width: 100%; margin-top: 10px; }
+        .btn-action:hover { filter: brightness(1.06); }
         .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
         
         .form-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; }
         .form-label { font-size: 14px; color: var(--text-sub); font-weight: 600;}
         .form-input { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 9px 12px; color: var(--text-main); text-align: right; outline: none; width: 140px; font-weight: 700; font-size: 15px; transition: all 0.25s;}
-        .form-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 15px rgba(56, 189, 248, 0.15); background-color: rgba(15, 23, 42, 0.95); }
+        .form-input:focus { border-color: var(--accent-blue); outline:2px solid rgba(56,189,248,0.28); outline-offset:1px; background-color: rgba(15, 23, 42, 0.95); }
         .form-input[readonly] { background-color: rgba(255,255,255,0.02); color: var(--text-sub); border-color: transparent; }
 
         .inventory-card { background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px; margin-bottom: 12px; transition: all 0.25s; }
@@ -348,7 +373,7 @@
         .vs-card-hover:hover .vs-val-amt { display: inline; animation: fadeIn 0.2s ease; }
 
         .scanlines { position: relative; overflow: hidden; }
-        .scanlines::after { content: ""; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(56, 189, 248, 0.05) 50%); background-size: 100% 6px; z-index: 5; pointer-events: none; opacity: 0.6; }
+        .scanlines::after { content: ""; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(56, 189, 248, 0.035) 50%); background-size: 100% 6px; z-index: 5; pointer-events: none; opacity: 0.12; }
 
         /* Widget CSS */
         .widget-controls { display:flex; gap:12px; align-items:center; }
@@ -425,14 +450,31 @@
             .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(15, 23, 42, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--border-color); z-index: 9998; padding: 8px 5px calc(8px + env(safe-area-inset-bottom)) 5px; justify-content: space-around; align-items: center; box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.6); }
             .bottom-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-sub); font-size: 10px; font-weight: 700; cursor: pointer; flex: 1; -webkit-tap-highlight-color: transparent; }
             .bottom-nav-item i { font-size: 18px; margin-bottom: 2px; }
-            .bottom-nav-item.active { color: var(--accent-blue); text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
+        .bottom-nav-item.active { color: var(--accent-blue); }
             .fab-container { bottom: calc(75px + env(safe-area-inset-bottom)) !important; }
+            .display-mode-bar { padding:0 10px 10px; align-items:flex-start; flex-wrap:wrap; }
+            .display-mode-help { flex-basis:100%; text-align:left; }
+        }
+
+        button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .nav-tab:focus-visible, .bottom-nav-item:focus-visible { outline:2px solid var(--status-info); outline-offset:2px; }
+        body.sandbox-mode .card { box-shadow:0 3px 12px rgba(0,0,0,0.24); }
+        .widget-pinned { box-shadow:0 0 0 1px rgba(56,189,248,0.2) !important; }
+        .fab-main { box-shadow:0 3px 12px rgba(0,0,0,0.32); }
+        .quest-card.completed, .badge-item.unlocked, .ticker-wrap { box-shadow:none; }
+        .badge-item.unlocked .badge-item-title { text-shadow:none; }
+        .section-title::before { box-shadow:none; }
+        .underwater-box::before { box-shadow:none; }
+        .chronos-time { text-shadow:none; }
+        .btn-add:hover, .btn-refresh:hover { box-shadow:none; }
+        .form-input:focus { box-shadow:none; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior:auto !important; animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
         }
 
         button, .nav-tab, .bottom-nav-item, .fab-main, .fab-item { touch-action: manipulation; }
     </style>
 </head>
-<body>
+<body class="simple-view">
 
 <canvas id="confetti-canvas"></canvas>
 
@@ -446,13 +488,22 @@
 
 <div class="app-container">
     <div class="header">
-        <div>📈 終極曝險雷達 <span style="font-size:11px; color:var(--accent-cyan); font-weight: 700;">(V17.3 逐項百分比強化 & PWA 旗艦版)</span></div>
+        <div>📈 終極曝險雷達 <span style="font-size:11px; color:var(--accent-cyan); font-weight:700;">V17.4</span></div>
         <div class="header-actions">
             <button id="btn-pwa-install" class="shield-toggle-btn" style="color:var(--accent-green); border-color:var(--accent-green); display:none;" onclick="installPWA()"><i class="fa-solid fa-mobile-screen-button"></i> 安裝 App</button>
             <button id="btn-sandbox" class="shield-toggle-btn" style="color:var(--accent-purple); border-color:var(--accent-purple);" onclick="toggleSandbox()"><i class="fa-solid fa-flask"></i> 平行沙盤</button>
-            <button id="btn-war-room" class="shield-toggle-btn" style="color:#38bdf8; border-color:#38bdf8;" onclick="toggleWarRoom()"><i class="fa-solid fa-table-columns"></i> 12欄戰情室</button>
+            <button id="btn-war-room" class="shield-toggle-btn advanced-only" style="color:#38bdf8; border-color:#38bdf8;" onclick="toggleWarRoom()"><i class="fa-solid fa-table-columns"></i> 12欄戰情室</button>
             <button id="btn-blind-shield" class="shield-toggle-btn" onclick="toggleBlindMode()"><i class="fa-solid fa-eye-slash"></i> 盲視</button>
         </div>
+    </div>
+
+    <div class="display-mode-bar">
+        <span class="display-mode-label">畫面資訊量</span>
+        <div class="display-mode-switch" role="group" aria-label="選擇畫面資訊量">
+            <button id="view-mode-simple" type="button" onclick="setDisplayMode(false)" aria-pressed="true">簡潔</button>
+            <button id="view-mode-detailed" type="button" onclick="setDisplayMode(true)" aria-pressed="false">詳細</button>
+        </div>
+        <span class="display-mode-help" id="view-mode-help">顯示重點與前五項；完整資料在詳細模式</span>
     </div>
 
     <div class="ticker-wrap" id="ui-ticker-wrap">
@@ -463,16 +514,13 @@
     <div style="padding: 0 15px;">
         <div class="card glow-card scanlines" style="margin-bottom: 12px; border-bottom: 4px solid var(--accent-blue); background: linear-gradient(180deg, var(--card-bg) 0%, rgba(15,23,42,0.85) 100%); position: relative;">
             
-            <div id="ui-defcon-badge" style="position: absolute; top: 15px; left: 15px; font-size: 11px; font-weight: 800; letter-spacing: 1px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--accent-green); color: var(--accent-green); background: rgba(52,211,153,0.1); z-index: 10;">
-                <i class="fa-solid fa-shield-check"></i> DEFCON 5
-            </div>
-
             <div class="hero-bento-grid">
                 <div>
                     <div class="exposure-display" style="padding-top: 25px; position:relative; z-index: 10;">
                         <div class="exposure-title">當前戰術曝險比率</div>
                         <div class="exposure-num blur-target" id="ui-exposure-ratio" data-val="0">0.00%</div>
-                        <div class="status-badge" id="ui-status-badge">系統計算中...</div>
+                        <div class="status-badge risk-status status-info" id="ui-status-badge" role="status" aria-live="polite">計算中</div>
+                        <div class="risk-context" id="ui-exposure-context">目標 --% · 容忍 ±--%</div>
                     </div>
                     <div id="ui-underwater-tracker" style="position:relative; z-index: 10;"></div>
                 </div>
@@ -519,8 +567,8 @@
             <div class="nav-tab" onclick="showTab('tab-overview')"><i class="fa-solid fa-satellite-dish"></i>雷達陣列</div>
             <div class="nav-tab" onclick="showTab('tab-details')"><i class="fa-solid fa-building-columns"></i>資金核心</div>
             <div class="nav-tab" onclick="showTab('tab-cashflow')"><i class="fa-solid fa-money-bill-transfer"></i>現金流量</div>
-            <div class="nav-tab" onclick="showTab('tab-tactics')"><i class="fa-solid fa-crosshairs"></i>戰術中樞</div>
-            <div class="nav-tab" onclick="showTab('tab-risk')"><i class="fa-solid fa-shield-virus"></i>黑天鵝防禦</div>
+            <div class="nav-tab advanced-nav" onclick="showTab('tab-tactics')"><i class="fa-solid fa-crosshairs"></i>戰術中樞</div>
+            <div class="nav-tab advanced-nav" onclick="showTab('tab-risk')"><i class="fa-solid fa-shield-virus"></i>風險情境</div>
             <div class="nav-tab" onclick="showTab('tab-settings')"><i class="fa-solid fa-cloud-arrow-up"></i>雲端與PWA</div>
         </div>
     </div>
@@ -583,8 +631,12 @@
             <div class="card bento-span-4">
                 <div class="section-header">
                     <div class="section-title">台股陣列 (手動精準現值)</div>
-                    <button class="btn-add" onclick="addStock()">＋ 新增艙位</button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-refresh" id="btn-fetch" onclick="fetchPrices()"><i class="fa-solid fa-rotate" style="margin-right:4px;"></i>更新股價</button>
+                        <button class="btn-add" onclick="addStock()">＋ 新增艙位</button>
+                    </div>
                 </div>
+                <div class="api-status" style="margin-bottom:8px;"><span id="ui-api-status">最新同步：尚未同步</span></div>
                 <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">點擊「🛡️」納入券商質押擔保品；支援自訂彈性槓桿倍率。</div>
                 <div id="stocks-container" class="blur-target"></div>
                 
@@ -729,7 +781,7 @@
         </div>
 
         <!-- 戰術中樞 -->
-        <div id="tab-tactics" class="tab-content">
+        <div id="tab-tactics" class="tab-content advanced-nav">
             <div id="tactics-pinned-area" style="min-height: 5px;"></div>
             <div id="tactics-divider" style="text-align:center; color:var(--text-sub); font-size:11px; margin: 15px 0 25px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); line-height: 0.1em; display:none;">
                 <span style="background:var(--bg-body); padding:0 10px; font-weight:600;"><i class="fa-solid fa-sort"></i> 以下為未釘選模組 (可自由拖曳排序)</span>
@@ -911,18 +963,18 @@
         </div>
 
         <!-- 黑天鵝壓力測試 (含質押維持率救援計算機) -->
-        <div id="tab-risk" class="tab-content">
+        <div id="tab-risk" class="tab-content advanced-nav">
             <div class="card bento-span-6" style="border: 1px solid rgba(248, 113, 113, 0.4); background: rgba(248, 113, 113, 0.05);">
                 <div class="section-header" style="margin-bottom: 10px;">
-                    <div class="section-title" style="color: var(--accent-red);">⚠️ 質押斷頭監控與護盾救援計算機</div>
+                    <div class="section-title" style="color: var(--status-alert);">質押維持率與壓力情境</div>
                 </div>
                 <div class="summary-table" style="margin-bottom: 14px;">
                     <div class="summary-row">
                         <div class="summary-cell label" style="font-weight: 700; color: var(--text-main);">當前總質押維持率</div>
-                        <div class="summary-cell val" id="ui-margin-ratio" style="font-weight:900; font-size:22px;">--%</div>
+                            <div style="text-align:right;"><div class="summary-cell val risk-value" id="ui-margin-ratio" style="font-weight:900; font-size:22px;">--%</div><span class="risk-status status-info" id="ui-margin-status">資料待填</span></div>
                     </div>
                     <div class="summary-row">
-                        <div class="summary-cell label" style="font-size: 13px;">距離 130% 追繳線允許下跌</div>
+                        <div class="summary-cell label" style="font-size: 13px;">距離系統 130% 追繳參考線可下跌</div>
                         <div class="summary-cell val" id="ui-margin-drop" style="color:var(--accent-red); font-size: 15px; font-weight:700;">--%</div>
                     </div>
                     <div class="summary-row">
@@ -930,10 +982,12 @@
                         <input type="number" class="form-input blur-target" id="input-collateral" readonly style="width:130px; border:none; background:transparent; padding:0; color:var(--accent-green); font-size: 15px;">
                     </div>
                 </div>
+                <div class="risk-context">系統參考：安全線 166% · 追繳線 130%。請依實際券商規則確認。</div>
                 
                 <div style="height: 1px; background-color: rgba(248, 113, 113, 0.2); margin: 15px 0;"></div>
                 
-                <div class="section-title" style="color: var(--text-main); margin-bottom:10px;">🌪️ 黑天鵝壓力測試模擬 (含維持率救援精算)</div>
+                <div class="section-title" style="color: var(--text-main); margin-bottom:6px;">壓力情境試算</div>
+                <div class="risk-context" style="margin:0 0 10px;">此為簡化假設，不代表特定歷史事件的實際市場走勢。</div>
                 <div class="form-label" style="text-align:center; font-weight:700;">模擬大盤瞬間重挫 <span id="stress-val" style="color:var(--accent-red); font-weight:900; font-size:20px;">0</span>%</div>
                 <div class="slider-container">
                     <input type="range" min="0" max="50" value="0" class="slider slider-stress" id="stress-slider" oninput="updateStress(this.value)">
@@ -953,7 +1007,7 @@
                     <div class="stress-item">
                         <div style="font-size:12px; color:var(--text-sub); font-weight:600;">災後真實曝險 / 災後維持率</div>
                         <div style="font-size:16px; font-weight:900; color:var(--accent-orange); margin-top:4px;">
-                            <span id="stress-exposure" data-val="0">0%</span> / <span id="stress-margin-ratio">--%</span>
+                            <span id="stress-exposure" data-val="0">0%</span> / <span id="stress-margin-ratio">--%</span> <span id="stress-margin-status" class="risk-status status-info">--</span>
                         </div>
                     </div>
                 </div>
@@ -1129,7 +1183,7 @@
         </div>
     </div>
 
-    <div class="footer">V17.3 純粹全息戰情室旗艦版 (逐項百分比強化 + 12-Col Bento Grid + PWA 離線架構)<br><span style="font-size: 11px; opacity: 0.6;">極簡高穩定架構 · 本地硬碟與 GAS 雲端雙重保護</span></div>
+    <div class="footer">曝險雷達 V17.4<br><span style="font-size:11px; opacity:0.7;">簡潔與詳細檢視 · 本機備份與雲端同步</span></div>
 </div>
 
 <div class="fab-container" id="ui-fab-container">
@@ -1146,8 +1200,8 @@
     <div class="bottom-nav-item" onclick="showTab('tab-overview')"><i class="fa-solid fa-satellite-dish"></i><span>雷達</span></div>
     <div class="bottom-nav-item" onclick="showTab('tab-details')"><i class="fa-solid fa-building-columns"></i><span>資金</span></div>
     <div class="bottom-nav-item" onclick="showTab('tab-cashflow')"><i class="fa-solid fa-money-bill-transfer"></i><span>金流</span></div>
-    <div class="bottom-nav-item" onclick="showTab('tab-tactics')"><i class="fa-solid fa-crosshairs"></i><span>戰術</span></div>
-    <div class="bottom-nav-item" onclick="showTab('tab-risk')"><i class="fa-solid fa-shield-virus"></i><span>防禦</span></div>
+    <div class="bottom-nav-item advanced-nav" onclick="showTab('tab-tactics')"><i class="fa-solid fa-crosshairs"></i><span>戰術</span></div>
+    <div class="bottom-nav-item advanced-nav" onclick="showTab('tab-risk')"><i class="fa-solid fa-shield-virus"></i><span>風險</span></div>
     <div class="bottom-nav-item" onclick="showTab('tab-settings')"><i class="fa-solid fa-cloud-arrow-up"></i><span>雲端</span></div>
 </div>
 
@@ -1164,20 +1218,45 @@
         rebalanceTargetInv: 50,
         kellyMu: 8.0, kellySigma: 18.0, mcYears: 10, mcMu: 8.0, mcSigma: 18.0, mcPmt: 30000,
         livingExpense: 30000, blindMode: false, warRoomMode: false, sandboxMode: false,
-        accounts: [], debts: [], stocks: [], funds: [], notes: [], history: [],
+        accounts: [], debts: [], stocks: [], funds: [], notes: [], history: [], marketPrices: {}, detailedView: false,
         achievements: { first_blood: false, nw_1m: false, nw_5m: false, runway_6m: false, debt_light: false, perfect_exp: false },
         tacticsOrder: ['widget-rebalance', 'widget-dca', 'widget-vix', 'widget-dampener', 'widget-kelly', 'widget-glide', 'widget-manual'],
         tacticsPinned: []
     };
     var charts = {};
     var chartPalette = ['#38bdf8', '#34d399', '#fbbf24', '#f87171', '#c084fc', '#ec4899', '#22d3ee', '#14b8a6'];
+    function getCategoryColor(label) {
+        var key = String(label || ''); var hash = 0;
+        for (var i = 0; i < key.length; i++) hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
+        return chartPalette[((hash % chartPalette.length) + chartPalette.length) % chartPalette.length];
+    }
     var currentFleetLevel = -1;
     var sortableRetry = 0;
 
     /* =========================================================
        V17.3 核心新增：圓餅圖右側「逐項百分比與市值進度列」渲染器
        ========================================================= */
-    function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
+function getBreakdownView(labels, values, colors) {
+    var items = (labels || []).map(function(label, index) {
+        return { label: label, value: parseFloat(values[index]) || 0, color: colors[index] || '#38bdf8' };
+    }).filter(function(item) { return item.value > 0; }).sort(function(a, b) { return b.value - a.value; });
+    if (!state.detailedView && items.length > 5) {
+        var hidden = items.slice(5);
+        items = items.slice(0, 5);
+        items.push({
+            label: '其他 (' + hidden.length + ' 項)',
+            value: hidden.reduce(function(total, item) { return total + item.value; }, 0),
+            color: '#64748b'
+        });
+    }
+    return {
+        labels: items.map(function(item) { return item.label; }),
+        values: items.map(function(item) { return item.value; }),
+        colors: items.map(function(item) { return item.color; })
+    };
+}
+
+function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
         var container = document.getElementById(containerId);
         if (!container) return;
         var total = (values || []).reduce(function(sum, v) { return sum + (parseFloat(v) || 0); }, 0);
@@ -1197,10 +1276,10 @@
 
         container.innerHTML = items.map(function(item) {
             return `
-                <div class="pct-legend-item">
+            <div class="pct-legend-item">
                     <div class="pct-legend-top">
                         <div class="pct-legend-name" title="${escapeHTML(item.label)}">
-                            <span class="pct-color-dot" style="background:${item.color}; box-shadow: 0 0 6px ${item.color};"></span>
+                            <span class="pct-color-dot" style="background:${item.color};"></span>
                             <span>${escapeHTML(item.label)}</span>
                         </div>
                         <div class="pct-legend-stats">
@@ -1249,7 +1328,7 @@
 
     function getManifestObject() {
         return {
-            name: "終極版曝險雷達 V17.3",
+            name: "曝險雷達 V17.4",
             short_name: "曝險雷達",
             description: "終身財富規劃與極限曝險雷達戰情室",
             start_url: "./index.html",
@@ -1300,7 +1379,7 @@
             filename = "manifest.json";
         } else {
             filename = "sw.js";
-            content = `const CACHE_NAME = 'exposure-radar-v17-3-cache';
+            content = `const CACHE_NAME = 'exposure-radar-v17-4-cache';
 const ASSETS = [
   './',
   './index.html',
@@ -1370,6 +1449,7 @@ self.addEventListener('fetch', e => {
         if (action === 'recordSnapshot') { recordSnapshot(); showTab('tab-settings'); }
         else if (action === 'addStock') { addStock(); showTab('tab-overview'); }
         else if (action === 'addAccountItem') { addAccountItem(); showTab('tab-details'); }
+        else if (action === 'fetchPrices') { showTab('tab-overview'); setTimeout(() => fetchPrices(), 150); }
     }
     document.addEventListener('click', function(event) { var fab = document.getElementById('ui-fab-container'); if (fab && fab.classList.contains('active') && !fab.contains(event.target)) fab.classList.remove('active'); });
 
@@ -1426,8 +1506,33 @@ self.addEventListener('fetch', e => {
         else if (currentLvlIdx < currentFleetLevel) { currentFleetLevel = currentLvlIdx; }
     }
 
+    function setDisplayMode(isDetailed) {
+        state.detailedView = !!isDetailed;
+        if (!state.detailedView && state.warRoomMode) {
+            state.warRoomMode = false;
+            document.body.classList.remove('war-room-mode');
+            var warRoomButton = document.getElementById('btn-war-room');
+            if (warRoomButton) { warRoomButton.classList.remove('active'); warRoomButton.innerHTML = '<i class="fa-solid fa-table-columns"></i> 12欄戰情室'; }
+        }
+        document.body.classList.toggle('detailed-view', state.detailedView);
+        document.body.classList.toggle('simple-view', !state.detailedView);
+        var simpleButton = document.getElementById('view-mode-simple');
+        var detailedButton = document.getElementById('view-mode-detailed');
+        if (simpleButton) simpleButton.setAttribute('aria-pressed', String(!state.detailedView));
+        if (detailedButton) detailedButton.setAttribute('aria-pressed', String(state.detailedView));
+        var help = document.getElementById('view-mode-help');
+        if (help) help.innerText = state.detailedView ? '顯示完整持倉明細與所有分析頁' : '顯示重點與前五項；完整資料在詳細模式';
+        var activeTab = document.querySelector('.tab-content.active');
+        if (!state.detailedView && activeTab && activeTab.classList.contains('advanced-nav')) showTab('tab-overview');
+        saveData();
+        updateSubCharts();
+        resizeAllCharts();
+    }
+
     function showTab(tabId) {
         if (state.warRoomMode) return;
+        var requestedTab = document.getElementById(tabId);
+        if (!state.detailedView && requestedTab && requestedTab.classList.contains('advanced-nav')) return;
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         var tg = document.getElementById(tabId); if(tg) tg.classList.add('active');
         document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
@@ -1448,6 +1553,12 @@ self.addEventListener('fetch', e => {
     }
 
     function formatNum(num) { return Math.round(num || 0).toLocaleString(); }
+    function setRiskLabel(elementId, level, text) {
+        var element = document.getElementById(elementId); if (!element) return;
+        element.classList.remove('status-safe', 'status-watch', 'status-alert', 'status-info');
+        element.classList.add('status-' + level);
+        element.innerText = text;
+    }
     function escapeHTML(value) {
         return String(value ?? '').replace(/[&<>"']/g, function(ch) {
             return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
@@ -1466,6 +1577,10 @@ self.addEventListener('fetch', e => {
         ['accounts','debts','stocks','funds','notes','history'].forEach(key => {
             if (!Array.isArray(normalized[key])) normalized[key] = [];
         });
+        if (normalized.marketPrices !== undefined && (!normalized.marketPrices || typeof normalized.marketPrices !== 'object' || Array.isArray(normalized.marketPrices))) {
+            throw new Error('備份檔的 marketPrices 格式不正確');
+        }
+        normalized.marketPrices = normalized.marketPrices || {};
         return normalized;
     }
     function createRestorePoint(reason) {
@@ -1481,9 +1596,11 @@ self.addEventListener('fetch', e => {
             if (saved) { 
                 var parsed = JSON.parse(saved);
                 if (parsed) {
-                    ['accounts','debts','stocks','funds','notes','history','achievements','tacticsOrder','tacticsPinned'].forEach(k => { if(parsed[k]) state[k] = parsed[k]; });
+                    ['accounts','debts','stocks','funds','notes','history','marketPrices','achievements','tacticsOrder','tacticsPinned'].forEach(k => { if(parsed[k]) state[k] = parsed[k]; });
                     ['cash','targetRatio','toleranceRatio','targetNetWorth','glideMax','glideMin','vix','biasRatio','kellyMu','kellySigma','mcYears','mcMu','mcSigma','mcPmt','livingExpense','rebalanceTargetInv'].forEach(k => { if(parsed[k] !== undefined) state[k] = parseFloat(parsed[k]); });
-                    ['autoGlidepath','autoDampener','blindMode','warRoomMode'].forEach(k => { if(parsed[k] !== undefined) state[k] = parsed[k]; });
+                    ['autoGlidepath','autoDampener','blindMode','warRoomMode','detailedView'].forEach(k => { if(parsed[k] !== undefined) state[k] = parsed[k]; });
+                    state.marketPrices = Object.assign({}, state.marketPrices || {}, parsed.marketPrices || {});
+                    if (parsed.lastSyncTime) state.lastSyncTime = parsed.lastSyncTime;
                     state.sandboxMode = false; state.gasUrl = parsed.gasUrl || state.gasUrl;
                 }
             }
@@ -1508,7 +1625,10 @@ self.addEventListener('fetch', e => {
         Object.keys(mapInputs).forEach(id => { var el = document.getElementById(id); if(el) el.value = mapInputs[id]; });
         
         var elToleranceText = document.getElementById('ui-tolerance-ratio-text'); if(elToleranceText) elToleranceText.innerText = state.toleranceRatio;
-        applyBlindMode(); applyWarRoomMode(false);
+        if (!state.detailedView) state.warRoomMode = false;
+        applyBlindMode();
+        setDisplayMode(state.detailedView);
+        applyWarRoomMode(false);
     }
 
     function saveData() { if (!state.sandboxMode) localStorage.setItem('exposure_radar_v16_18_data', JSON.stringify(state)); }
@@ -1621,22 +1741,41 @@ self.addEventListener('fetch', e => {
         var gasUrl = document.getElementById('input-gas-url').value.trim(); if (!gasUrl) return alert("請先填寫 Google Apps Script 網址！");
         state.gasUrl = gasUrl; saveData(); var btn = document.getElementById('btn-sync-down'); if(btn) { btn.innerHTML = '還原中...'; btn.disabled = true; }
         try {
-            var res = await fetch(gasUrl); var result = await res.json(); var incomingState = null;
-            if (result && result.state) { incomingState = typeof result.state === 'string' ? JSON.parse(result.state) : result.state; } else if (result && result.targetRatio !== undefined) { incomingState = result; }
-            if (incomingState) { 
+            var res = await fetch(gasUrl);
+            if (!res.ok) throw new Error('伺服器回應 ' + res.status);
+            var result = await res.json(); var incomingState = null;
+            if (result && result.state) {
+                incomingState = typeof result.state === 'string' ? JSON.parse(result.state) : result.state;
+                if (!incomingState.marketPrices) incomingState.marketPrices = {};
+                if (result.cloudPrices && typeof result.cloudPrices === 'object') {
+                    Object.keys(result.cloudPrices).forEach(code => {
+                        var price = Number(result.cloudPrices[code]);
+                        if (Number.isFinite(price) && price > 0) incomingState.marketPrices[String(code).trim().toUpperCase()] = price;
+                    });
+                }
+                if (result.cloudVix !== undefined && Number.isFinite(Number(result.cloudVix))) incomingState.vix = Number(result.cloudVix);
+            } else if (result && result.targetRatio !== undefined) incomingState = result;
+            if (incomingState) {
                 incomingState = normalizeStateShape(incomingState);
-                if(!confirm(`即將用雲端資料覆蓋目前資料，確定繼續嗎？`)) return;
+                if (!confirm('即將以雲端資料覆蓋目前資料，股價快取將一併同步。確定繼續嗎？')) return;
                 createRestorePoint('before-cloud-sync');
-                Object.keys(incomingState).forEach(k => { if(state[k] !== undefined) state[k] = incomingState[k]; }); 
-                state.sandboxMode = false; saveData(); location.reload(); 
-            } else { alert("雲端內無有效備份資料。"); }
-        } catch(e) { alert("連線失敗：" + e.message); } finally { if(btn) { btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> 下載還原'; btn.disabled = false; } }
+                var localMarketPrices = Object.assign({}, state.marketPrices || {});
+                Object.keys(incomingState).forEach(k => { if (Object.prototype.hasOwnProperty.call(state, k)) state[k] = incomingState[k]; });
+                state.marketPrices = Object.assign({}, localMarketPrices, incomingState.marketPrices || {});
+                var priceUpdates = applyMarketPricesToStocks();
+                state.sandboxMode = false;
+                state.lastSyncTime = new Date().toLocaleString('zh-TW', { hour12: false });
+                saveData();
+                alert('☁️ 雲端還原與同步成功！' + (priceUpdates ? '\n已同步 ' + priceUpdates + ' 個股票價格。' : '\n雲端未提供可套用的最新股價，原有單價已保留。'));
+                location.reload();
+            } else { alert('雲端內無有效備份資料。'); }
+        } catch(e) { alert('雲端還原失敗：' + e.message); } finally { if(btn) { btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> 下載還原'; btn.disabled = false; } }
     }
 
     function exportToFile() {
-        var exportState = Object.assign({}, state, { backupVersion: 'v17.3-pct-visual', exportedAt: new Date().toISOString() });
+        var exportState = Object.assign({}, state, { backupVersion: 'v17.4-visual-refresh', exportedAt: new Date().toISOString() });
         var blob = new Blob([JSON.stringify(exportState, null, 2)], { type: "application/json" }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = `exposure_backup_v17_3_${getLocalDateString()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        a.download = `exposure_backup_v17_4_${getLocalDateString()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
     
     function importFromFile(event) {
@@ -1719,11 +1858,11 @@ self.addEventListener('fetch', e => {
                     cellStyle += 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);';
                     innerHtml = '<div style="font-size:13px; font-weight:800; color:#fff;">' + day + '</div><div style="font-size:10px; color:var(--accent-blue);">首筆</div>';
                 } else if (rec.diff >= 0) {
-                    cellStyle += 'background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3);';
-                    innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--accent-red);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--accent-red);">+' + (rec.diff/10000).toFixed(1) + '萬</div>';
+                    cellStyle += 'background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.28);';
+                    innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--status-safe);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--status-safe);">+' + (rec.diff/10000).toFixed(1) + '萬</div>';
                 } else {
-                    cellStyle += 'background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3);';
-                    innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--accent-green);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--accent-green);">-' + (Math.abs(rec.diff)/10000).toFixed(1) + '萬</div>';
+                    cellStyle += 'background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.28);';
+                    innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--status-alert);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--status-alert);">-' + (Math.abs(rec.diff)/10000).toFixed(1) + '萬</div>';
                 }
             }
             html += '<div style="' + cellStyle + '" ' + (rec ? 'onclick="showSnapshotDetails(\'' + dateStr + '\')"' : '') + '>' + innerHtml + '</div>';
@@ -1813,12 +1952,84 @@ self.addEventListener('fetch', e => {
     function addFund() { state.funds.push({ id: 'f'+Date.now(), name: '', value: 0, mult: 1, isCollateral: false }); renderFunds(); updateTotals(); }
     function removeFund(idx) { if(confirm('卸載部位？')) { state.funds.splice(idx, 1); renderFunds(); updateTotals(); } }
 
+    function applyMarketPricesToStocks() {
+        var updated = 0;
+        (state.stocks || []).forEach(function(stock) {
+            var code = String(stock.code || '').trim().toUpperCase();
+            var price = Number(state.marketPrices && state.marketPrices[code]);
+            if (code && Number.isFinite(price) && price > 0) { stock.price = price; updated++; }
+        });
+        return updated;
+    }
+
+    async function fetchPrices() {
+        var btn = document.getElementById('btn-fetch');
+        if (!Array.isArray(state.stocks) || state.stocks.length === 0) { alert('請先新增股票並輸入代碼。'); return; }
+        var codes = [...new Set(state.stocks.map(s => String(s.code || '').trim().toUpperCase()).filter(Boolean))];
+        if (!codes.length) { alert('請先輸入股票代碼。'); return; }
+        var original = btn ? btn.innerHTML : '';
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 更新中'; }
+        var prices = {};
+        try {
+            var controller = new AbortController(); var timeout = setTimeout(() => controller.abort(), 8000);
+            var responses = await Promise.all([
+                fetch('https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL', { signal: controller.signal }).catch(() => null),
+                fetch('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes', { signal: controller.signal }).catch(() => null)
+            ]);
+            clearTimeout(timeout);
+            if (responses[0] && responses[0].ok) {
+                var twse = await responses[0].json();
+                twse.forEach(item => { var code = String(item.Code || '').trim().toUpperCase(); var price = parseFloat(String(item.ClosingPrice || '').replace(/,/g, '')); if (code && price > 0) prices[code] = price; });
+            }
+            if (responses[1] && responses[1].ok) {
+                var tpex = await responses[1].json();
+                tpex.forEach(item => { var code = String(item.SecuritiesCompanyCode || item.code || '').trim().toUpperCase(); var price = parseFloat(String(item.Close || item.close || '').replace(/,/g, '')); if (code && price > 0) prices[code] = price; });
+            }
+        } catch (error) { console.warn('交易所股價讀取失敗:', error); }
+
+        var missingCodes = codes.filter(code => !prices[code]);
+        if (missingCodes.length) {
+            var symbols = missingCodes.flatMap(code => [code + '.TW', code + '.TWO']);
+            var yahooUrl = 'https://query1.finance.yahoo.com/v7/finance/spark?symbols=' + symbols.join(',');
+            for (var proxy of ['https://corsproxy.io/?url=', 'https://api.allorigins.win/raw?url=']) {
+                try {
+                    var proxyController = new AbortController(); var proxyTimeout = setTimeout(() => proxyController.abort(), 5000);
+                    var proxyResponse = await fetch(proxy + encodeURIComponent(yahooUrl), { signal: proxyController.signal });
+                    clearTimeout(proxyTimeout);
+                    if (!proxyResponse.ok) continue;
+                    var yahooData = await proxyResponse.json();
+                    if (yahooData && yahooData.spark && Array.isArray(yahooData.spark.result)) {
+                        yahooData.spark.result.forEach(item => {
+                            var match = String(item.symbol || '').match(/^([A-Z0-9]+)\.(TW|TWO)$/);
+                            var price = Number(item.response && item.response[0] && item.response[0].meta && item.response[0].meta.regularMarketPrice);
+                            if (match && Number.isFinite(price) && price > 0) prices[match[1]] = price;
+                        });
+                    }
+                    if (missingCodes.some(code => prices[code])) break;
+                } catch (error) { console.warn('備援股價來源讀取失敗:', error); }
+            }
+        }
+
+        codes.forEach(code => { if (Number.isFinite(Number(prices[code])) && Number(prices[code]) > 0) state.marketPrices[code] = Number(prices[code]); });
+        var updated = applyMarketPricesToStocks();
+        if (!updated) {
+            if (btn) { btn.disabled = false; btn.innerHTML = original; }
+            alert('目前無法取得輸入代碼的最新股價；原有價格已保留。請確認代碼或稍後再試。');
+            return;
+        }
+        state.lastSyncTime = new Date().toLocaleString('zh-TW', { hour12: false });
+        saveData(); renderStocks(); updateTotals();
+        var status = document.getElementById('ui-api-status'); if (status) status.innerText = '最新同步：' + state.lastSyncTime;
+        if (btn) { btn.disabled = false; btn.innerHTML = original; }
+        alert('股價更新完成，已更新 ' + updated + ' 個股票部位。');
+    }
+
     function updateVixSignal(val) {
         var vix = parseFloat(val) || 0; state.vix = vix; var res = document.getElementById('vix-signal-result'); if (!res) return;
-        if (vix >= 50) { res.innerHTML = '<div style="font-size: 20px; font-weight: 900; color: var(--accent-red);">💥 大大買進！極度恐慌</div>'; res.style.background = 'rgba(248, 113, 113, 0.15)'; } 
-        else if (vix >= 40) { res.innerHTML = '<div style="font-size: 18px; font-weight: 900; color: var(--accent-orange);">🚨 中中買進！逢低加碼</div>'; res.style.background = 'rgba(234, 88, 12, 0.15)'; } 
-        else if (vix >= 30) { res.innerHTML = '<div style="font-size: 16px; font-weight: 900; color: var(--accent-orange);">⚠️ 小小買進！分批進場</div>'; res.style.background = 'rgba(251, 191, 36, 0.1)'; } 
-        else { res.innerHTML = '<div style="font-size: 15px; font-weight: 800; color: var(--accent-green);">🛡️ 航線穩定，執行常規紀律</div>'; res.style.background = 'rgba(52, 211, 153, 0.1)'; }
+        if (vix >= 50) { res.innerHTML = '<div class="risk-status status-alert">極高波動 · 風險升高</div>'; res.style.background = 'rgba(248, 113, 113, 0.08)'; }
+        else if (vix >= 40) { res.innerHTML = '<div class="risk-status status-watch">高波動 · 留意風險</div>'; res.style.background = 'rgba(251, 191, 36, 0.08)'; }
+        else if (vix >= 30) { res.innerHTML = '<div class="risk-status status-watch">波動升溫 · 持續觀察</div>'; res.style.background = 'rgba(251, 191, 36, 0.06)'; }
+        else { res.innerHTML = '<div class="risk-status status-safe">一般波動區間</div>'; res.style.background = 'rgba(52, 211, 153, 0.06)'; }
     }
 
     function calculatePMT(principal, annualRate, years) { if (principal <= 0) return 0; if (annualRate <= 0) return principal / (years * 12); var monthlyRate = (annualRate / 100) / 12; var months = years * 12; return principal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1); }
@@ -2077,6 +2288,8 @@ self.addEventListener('fetch', e => {
         var colEl = document.getElementById('input-collateral'); if(colEl) colEl.value = Math.round(collateralTotal);
 
         var netWorth = (totalInv + totalCashSum) - totalDebt, ratioRaw = netWorth > 0 ? (totalExp / netWorth) * 100 : 0;
+        var apiStatusEl = document.getElementById('ui-api-status');
+        if (apiStatusEl) apiStatusEl.innerText = '最新同步：' + (state.lastSyncTime || '尚未同步');
         animateNumber('ui-total-inv', totalInv, '$'); animateNumber('ui-total-exp', totalExp, '$'); animateNumber('ui-net-worth', netWorth, '$'); animateNumber('ui-exposure-ratio', ratioRaw, '', '%', 2); 
 
         var totalAssetsPool = totalInv + totalCashSum, cashPct = totalAssetsPool > 0 ? (totalCashSum / totalAssetsPool) * 100 : 0, invPct = totalAssetsPool > 0 ? (totalInv / totalAssetsPool) * 100 : 0, debtRatio = totalAssetsPool > 0 ? (totalDebt / totalAssetsPool) * 100 : 0;
@@ -2095,6 +2308,8 @@ self.addEventListener('fetch', e => {
         var dampenAmount = state.autoDampener ? (state.biasRatio >= 15 ? 30 : (state.biasRatio >= 10 ? 20 : (state.biasRatio >= 5 ? 10 : 0))) : 0;
         state.effectiveTargetRatio = Math.max(0, state.targetRatio - dampenAmount);
         document.getElementById('ui-target-ratio-text').innerText = state.effectiveTargetRatio;
+        var exposureContext = document.getElementById('ui-exposure-context');
+        if (exposureContext) exposureContext.innerText = '目標 ' + state.effectiveTargetRatio + '% · 容忍 ±' + state.toleranceRatio + '%';
 
         var runwayMonths = totalMonthlyOutflow > 0 ? (totalCashSum / totalMonthlyOutflow) : 999;
         document.getElementById('ui-cash-runway').innerText = totalMonthlyOutflow > 0 ? runwayMonths.toFixed(1) + ' 個月' : '無流出';
@@ -2102,8 +2317,19 @@ self.addEventListener('fetch', e => {
         var marginRatio = totalPledgeSum > 0 ? (collateralTotal / totalPledgeSum) * 100 : 999;
         var marginEl = document.getElementById('ui-margin-ratio');
         if(marginEl) {
-            if(totalPledgeSum === 0) { marginEl.innerText = "無質押"; document.getElementById('ui-margin-drop').innerText = "--"; } 
-            else { marginEl.innerText = marginRatio.toFixed(1) + "%"; var dropToMarginCall = marginRatio > 130 ? (1 - (1.3 * totalPledgeSum / collateralTotal)) * 100 : 0; document.getElementById('ui-margin-drop').innerText = dropToMarginCall > 0 ? "-" + dropToMarginCall.toFixed(1) + "%" : "已達追繳線"; }
+            marginEl.classList.remove('status-safe', 'status-watch', 'status-alert');
+            if(totalPledgeSum === 0) {
+                marginEl.innerText = "無質押";
+                document.getElementById('ui-margin-drop').innerText = "--";
+                setRiskLabel('ui-margin-status', 'info', '無質押借款');
+            } else {
+                var marginLevel = marginRatio >= 166 ? 'safe' : (marginRatio >= 130 ? 'watch' : 'alert');
+                marginEl.classList.add('status-' + marginLevel);
+                marginEl.innerText = marginRatio.toFixed(1) + "%";
+                setRiskLabel('ui-margin-status', marginLevel, marginLevel === 'safe' ? '安全' : (marginLevel === 'watch' ? '注意' : '低於追繳線'));
+                var dropToMarginCall = marginRatio > 130 && collateralTotal > 0 ? (1 - (1.3 * totalPledgeSum / collateralTotal)) * 100 : 0;
+                document.getElementById('ui-margin-drop').innerText = dropToMarginCall > 0 ? "-" + dropToMarginCall.toFixed(1) + "%" : "已達追繳線";
+            }
         }
 
         var stressPct = parseInt(document.getElementById('stress-slider').value) / 100;
@@ -2114,6 +2340,8 @@ self.addEventListener('fetch', e => {
         animateNumber('stress-networth', newNetWorth, '$');
         animateNumber('stress-exposure', (newNetWorth > 0 ? (newTotalExp / newNetWorth) * 100 : 0), '', '%', 1);
         document.getElementById('stress-margin-ratio').innerText = totalPledgeSum > 0 ? stressedMargin.toFixed(1) + '%' : '無質押';
+        var stressMarginLevel = stressedMargin >= 166 ? 'safe' : (stressedMargin >= 130 ? 'watch' : 'alert');
+        setRiskLabel('stress-margin-status', totalPledgeSum > 0 ? stressMarginLevel : 'info', totalPledgeSum > 0 ? (stressMarginLevel === 'safe' ? '安全' : (stressMarginLevel === 'watch' ? '注意' : '低於追繳線')) : '無質押');
 
         var rescueBox = document.getElementById('ui-margin-rescue-box');
         if (rescueBox) {
@@ -2130,9 +2358,6 @@ self.addEventListener('fetch', e => {
             }
         }
 
-        var badge = document.getElementById('ui-status-badge');
-        if (badge) { badge.innerText = ratioRaw <= 120 ? "安全巡航" : (ratioRaw <= 180 ? "優化水位" : "高壓槓桿"); badge.style.color = ratioRaw <= 120 ? "var(--accent-green)" : (ratioRaw <= 180 ? "var(--accent-orange)" : "var(--accent-red)"); }
-        
         updateDynamicBuffer(totalCashSum, totalMonthlyOutflow, totalDebt, state.vix);
         updateFleetStatus(netWorth); updateDrawdown(netWorth); updateSimulator(netWorth, totalExp, ratioRaw); 
         checkAndRenderQuests(netWorth, runwayMonths, debtRatio, ratioRaw);
@@ -2159,14 +2384,23 @@ self.addEventListener('fetch', e => {
 
     function updateSimulator(netWorth, totalExp, currentPct) {
         var targetPct = parseFloat(state.effectiveTargetRatio) || 100, tolerance = parseFloat(state.toleranceRatio) || 5, gap = (netWorth * (targetPct / 100)) - totalExp;
-        var dev = Math.abs(currentPct - targetPct), defconLevel = dev >= tolerance ? 1 : (dev >= tolerance * 0.5 ? 3 : 5);
+        var res = document.getElementById('simulator-result');
+        if (netWorth <= 0) {
+            document.body.classList.remove('defcon-1', 'defcon-3', 'defcon-5');
+            setRiskLabel('ui-status-badge', 'info', '資料待填');
+            if (res) res.innerText = '請先輸入資產與負債資料。';
+            return;
+        }
+        var deviation = currentPct - targetPct, dev = Math.abs(deviation);
+        var defconLevel = dev >= tolerance ? 1 : (dev >= tolerance * 0.8 ? 3 : 5);
         document.body.classList.remove('defcon-1', 'defcon-3', 'defcon-5'); document.body.classList.add(`defcon-${defconLevel}`);
-        var defconBadge = document.getElementById('ui-defcon-badge');
-        if (defconBadge) defconBadge.innerHTML = defconLevel === 1 ? '<span style="color:var(--accent-red);">DEFCON 1 (需再平衡)</span>' : (defconLevel === 3 ? '<span style="color:var(--accent-orange);">DEFCON 3 (警戒)</span>' : '<span style="color:var(--accent-green);">DEFCON 5 (和平巡航)</span>');
-        var res = document.getElementById('simulator-result'); if (!res) return;
-        if (netWorth <= 0) { res.innerHTML = '請先設定資產庫存。'; return; }
-        if (defconLevel !== 1) { res.innerHTML = `<div style="color:var(--accent-green); font-weight:800; text-align:center;">🛡️ 曝險處於 ±${tolerance}% 安全容忍區間內</div>`; return; }
-        res.innerHTML = `<div style="text-align:center; font-weight:800; color:${gap > 0 ? 'var(--accent-blue)' : 'var(--accent-red)'};">💡 曝險缺口 $${formatNum(Math.abs(gap))}：建議${gap > 0 ? '買進' : '賣出'} 2X 槓桿 ETF 約 $${formatNum(Math.abs(gap/2))}</div>`;
+        var level = defconLevel === 1 ? 'alert' : (defconLevel === 3 ? 'watch' : 'safe');
+        var label = defconLevel === 1 ? '超出容忍區' : (defconLevel === 3 ? '接近容忍邊界' : '在容忍區內');
+        setRiskLabel('ui-status-badge', level, label);
+        if (!res) return;
+        if (defconLevel === 5) { res.innerHTML = `<div class="risk-status status-safe">目前在設定的 ±${tolerance}% 容忍範圍內</div>`; return; }
+        if (defconLevel === 3) { res.innerHTML = `<div class="risk-status status-watch">目前曝險${deviation < 0 ? '低於' : '高於'}目標 ${dev.toFixed(1)} 個百分點，接近容忍邊界</div>`; return; }
+        res.innerHTML = `<div class="risk-status status-alert">目前曝險${deviation < 0 ? '低於' : '高於'}目標 ${dev.toFixed(1)} 個百分點，已超出容忍範圍</div>`;
     }
 
     /* =========================================================
@@ -2192,15 +2426,18 @@ self.addEventListener('fetch', e => {
                 if (val > 0) groupedFunds[name] = (groupedFunds[name] || 0) + val;
             });
 
-            var stockLabels = Object.keys(groupedStocks), stockVals = Object.values(groupedStocks);
+            var rawStockLabels = Object.keys(groupedStocks), rawStockVals = Object.values(groupedStocks);
+            var stockColors = rawStockLabels.map(getCategoryColor);
+            var stockView = getBreakdownView(rawStockLabels, rawStockVals, stockColors);
             if (charts.stock) {
-                charts.stock.data.labels = stockLabels;
-                charts.stock.data.datasets[0].data = stockVals;
+                charts.stock.data.labels = stockView.labels;
+                charts.stock.data.datasets[0].data = stockView.values;
+                charts.stock.data.datasets[0].backgroundColor = stockView.colors;
                 charts.stock.update('none');
             }
-            renderPctBreakdownList('stock-pct-list', stockLabels, stockVals, chartPalette, '尚無台股持倉');
+            renderPctBreakdownList('stock-pct-list', stockView.labels, stockView.values, stockView.colors, '尚無台股持倉');
 
-            var levLabels = ['1X 原型部位', '1.5X~3X 槓桿', '0X 防禦部位'];
+            var levLabels = ['1X 原型部位', '1.5X+ 槓桿部位', '0X 防禦部位'];
             var levColors = ['#34d399', '#ec4899', '#38bdf8'];
             if (charts.leverage) {
                 charts.leverage.data.labels = levLabels;
@@ -2209,13 +2446,16 @@ self.addEventListener('fetch', e => {
             }
             renderPctBreakdownList('leverage-pct-list', levLabels, leverageValues, levColors, '尚無槓桿配置數據');
 
-            var fundLabels = Object.keys(groupedFunds), fundVals = Object.values(groupedFunds);
+            var rawFundLabels = Object.keys(groupedFunds), rawFundVals = Object.values(groupedFunds);
+            var fundColors = rawFundLabels.map(getCategoryColor);
+            var fundView = getBreakdownView(rawFundLabels, rawFundVals, fundColors);
             if (charts.fund) {
-                charts.fund.data.labels = fundLabels;
-                charts.fund.data.datasets[0].data = fundVals;
+                charts.fund.data.labels = fundView.labels;
+                charts.fund.data.datasets[0].data = fundView.values;
+                charts.fund.data.datasets[0].backgroundColor = fundView.colors;
                 charts.fund.update('none');
             }
-            renderPctBreakdownList('fund-pct-list', fundLabels, fundVals, chartPalette, '尚無基金或海外資產');
+            renderPctBreakdownList('fund-pct-list', fundView.labels, fundView.values, fundView.colors, '尚無基金或海外資產');
         } catch(e) {
             console.error('子圖表更新失敗:', e);
         }
@@ -2266,7 +2506,7 @@ self.addEventListener('fetch', e => {
         });
         charts.leverage = new Chart(document.getElementById('leverageChart').getContext('2d'), {
             type: 'doughnut',
-            data: { labels: ['1X 原型部位', '1.5X~3X 槓桿', '0X 防禦部位'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#34d399', '#ec4899', '#38bdf8'], borderWidth: 0, hoverOffset: 6 }] },
+            data: { labels: ['1X 原型部位', '1.5X+ 槓桿部位', '0X 防禦部位'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#34d399', '#ec4899', '#38bdf8'], borderWidth: 0, hoverOffset: 6 }] },
             options: cleanDoughnutOpts
         });
         charts.fund = new Chart(document.getElementById('fundChart').getContext('2d'), {
