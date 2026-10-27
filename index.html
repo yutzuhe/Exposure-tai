@@ -1583,6 +1583,21 @@ self.addEventListener('fetch', e => {
         normalized.marketPrices = normalized.marketPrices || {};
         return normalized;
     }
+    function extractCloudState(response) {
+        var candidate = response;
+        for (var depth = 0; depth < 5; depth++) {
+            if (typeof candidate === 'string') {
+                candidate = JSON.parse(candidate);
+                continue;
+            }
+            if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) return null;
+            if (candidate.state !== undefined) { candidate = candidate.state; continue; }
+            if (candidate.data !== undefined && !Array.isArray(candidate.data)) { candidate = candidate.data; continue; }
+            if (candidate.payload !== undefined) { candidate = candidate.payload; continue; }
+            return candidate;
+        }
+        throw new Error('雲端資料包裝層過多或格式錯誤');
+    }
     function createRestorePoint(reason) {
         try {
             localStorage.setItem('exposure_radar_restore_point', JSON.stringify(Object.assign({}, state, { restorePointReason: reason, restorePointAt: new Date().toISOString() })));
@@ -1741,26 +1756,32 @@ self.addEventListener('fetch', e => {
         var gasUrl = document.getElementById('input-gas-url').value.trim(); if (!gasUrl) return alert("請先填寫 Google Apps Script 網址！");
         state.gasUrl = gasUrl; saveData(); var btn = document.getElementById('btn-sync-down'); if(btn) { btn.innerHTML = '還原中...'; btn.disabled = true; }
         try {
-            var res = await fetch(gasUrl);
+            var res = await fetch(gasUrl, { cache: 'no-store' });
             if (!res.ok) throw new Error('伺服器回應 ' + res.status);
-            var result = await res.json(); var incomingState = null;
-            if (result && result.state) {
-                incomingState = typeof result.state === 'string' ? JSON.parse(result.state) : result.state;
-                if (!incomingState.marketPrices) incomingState.marketPrices = {};
-                if (result.cloudPrices && typeof result.cloudPrices === 'object') {
-                    Object.keys(result.cloudPrices).forEach(code => {
-                        var price = Number(result.cloudPrices[code]);
-                        if (Number.isFinite(price) && price > 0) incomingState.marketPrices[String(code).trim().toUpperCase()] = price;
-                    });
-                }
-                if (result.cloudVix !== undefined && Number.isFinite(Number(result.cloudVix))) incomingState.vix = Number(result.cloudVix);
-            } else if (result && result.targetRatio !== undefined) incomingState = result;
+            var result = await res.json();
+            var incomingState = extractCloudState(result);
+            if (incomingState && !['accounts','debts','stocks','funds','notes','history','cash','targetRatio'].some(key => Object.prototype.hasOwnProperty.call(incomingState, key))) {
+                incomingState = null;
+            }
+            if (incomingState && result && result.cloudPrices && typeof result.cloudPrices === 'object') {
+                incomingState.marketPrices = Object.assign({}, incomingState.marketPrices || {});
+                Object.keys(result.cloudPrices).forEach(code => {
+                    var price = Number(result.cloudPrices[code]);
+                    if (Number.isFinite(price) && price > 0) incomingState.marketPrices[String(code).trim().toUpperCase()] = price;
+                });
+            }
+            if (incomingState && result && result.cloudVix !== undefined && Number.isFinite(Number(result.cloudVix))) incomingState.vix = Number(result.cloudVix);
             if (incomingState) {
+                ['accounts','debts','stocks','funds','notes','history'].forEach(key => {
+                    if (incomingState[key] === undefined && Array.isArray(state[key])) incomingState[key] = state[key];
+                });
                 incomingState = normalizeStateShape(incomingState);
-                if (!confirm('即將以雲端資料覆蓋目前資料，股價快取將一併同步。確定繼續嗎？')) return;
+                var latestSnapshot = incomingState.history.length ? incomingState.history.map(item => item.date || '').filter(Boolean).sort().slice(-1)[0] : '無';
+                var cloudSummary = `帳戶 ${incomingState.accounts.length} 筆 · 股票 ${incomingState.stocks.length} 筆 · 快照 ${incomingState.history.length} 筆（最新：${latestSnapshot}）`;
+                if (!confirm(`即將以雲端資料覆蓋目前資料：\n\n${cloudSummary}\n\n股價快取也會一併同步。確定繼續嗎？`)) return;
                 createRestorePoint('before-cloud-sync');
                 var localMarketPrices = Object.assign({}, state.marketPrices || {});
-                Object.keys(incomingState).forEach(k => { if (Object.prototype.hasOwnProperty.call(state, k)) state[k] = incomingState[k]; });
+                Object.keys(incomingState).forEach(k => { state[k] = incomingState[k]; });
                 state.marketPrices = Object.assign({}, localMarketPrices, incomingState.marketPrices || {});
                 var priceUpdates = applyMarketPricesToStocks();
                 state.sandboxMode = false;
