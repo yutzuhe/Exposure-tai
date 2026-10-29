@@ -1,4 +1,4 @@
-const CACHE_NAME = 'exposure-radar-v17-5-cache';
+const CACHE_NAME = 'exposure-radar-v17-6-cache';
 const CACHE_PREFIX = 'exposure-radar-';
 const APP_PAGE = './index.html';
 const APP_SHELL = [APP_PAGE, './manifest.json'];

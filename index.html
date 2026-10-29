@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="曝險雷達">
-    <title>曝險雷達 V17.5 · 清晰檢視</title>
+    <title>曝險雷達 V17.6 · 清晰檢視</title>
     <!-- 外部 CDN 載入 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -264,6 +264,34 @@
         .card:hover { border-color: rgba(148,163,184,0.4); }
         
         .exposure-display { text-align: center; padding: 5px 0 15px 0; position: relative;}
+        .wealth-overview { margin: 0 0 16px; padding: 18px; border: 1px solid var(--border-color); border-radius: 16px; background: linear-gradient(145deg, rgba(30,41,59,0.96), rgba(15,23,42,0.94)); }
+        .wealth-overview-heading { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+        .wealth-overview-title { color:var(--text-main); font-size:15px; font-weight:800; }
+        .wealth-overview-status { color:var(--text-sub); font-size:11px; text-align:right; }
+        .wealth-overview-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; }
+        .wealth-metric { min-width:0; min-height:154px; padding:20px; border-radius:14px; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.08); container-type:inline-size; }
+        .wealth-metric.primary { background:linear-gradient(145deg, rgba(56,189,248,0.10), rgba(255,255,255,0.025)); border-color:rgba(56,189,248,0.22); }
+        .wealth-metric-label { color:var(--text-sub); font-size:12px; font-weight:700; margin-bottom:7px; }
+        .wealth-metric-value { color:var(--text-main); font-size:clamp(16px, 6cqi, 24px); line-height:1.2; font-weight:900; white-space:nowrap; letter-spacing:-0.04em; font-variant-numeric:tabular-nums; max-width:100%; }
+        .wealth-metric.primary .wealth-metric-value { color:var(--accent-blue); font-size:clamp(18px, 6.2cqi, 26px); }
+        .wealth-metric-detail { display:flex; justify-content:space-between; gap:12px; padding-top:11px; margin-top:13px; border-top:1px solid rgba(255,255,255,0.07); color:var(--text-sub); font-size:12px; }
+        .wealth-metric-detail strong { color:var(--text-main); font-weight:700; white-space:nowrap; }
+        .wealth-overview-note { color:var(--text-sub); font-size:11px; line-height:1.5; margin-top:12px; }
+        @media (max-width: 900px) {
+            .wealth-overview-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+            .wealth-metric:last-child { grid-column:1 / -1; min-height:auto; }
+            .wealth-metric:last-child .wealth-metric-detail { max-width:380px; }
+        }
+        @media (max-width: 600px) {
+            .wealth-overview { margin:0 10px 14px; padding:15px; }
+            .wealth-overview-grid { grid-template-columns:minmax(0, 1fr); gap:9px; }
+            .wealth-metric, .wealth-metric:last-child { grid-column:auto; min-height:auto; padding:15px 16px; }
+            .wealth-overview-heading { align-items:flex-start; }
+        }
+        @supports not (font-size: 1cqi) {
+            .wealth-metric-value { font-size:clamp(16px, 1.25vw, 22px); }
+            .wealth-metric.primary .wealth-metric-value { font-size:clamp(18px, 1.4vw, 24px); }
+        }
         .exposure-title { font-size: 14px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase;}
         .status-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 13px; margin-top: 8px; font-weight: 800; border: 1px solid transparent;}
         .exposure-num { font-size: 54px; font-weight: 900; color: var(--text-main); margin-top: 2px; }
@@ -324,12 +352,21 @@
         .inv-input-text { flex: 1; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 8px; color: var(--text-main); font-size: 13px; outline: none; width: 100%; font-weight: 500;}
         .inv-input-code { width: 74px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 8px; color: var(--text-main); font-size: 13px; text-transform: uppercase; outline: none; text-align: center; font-weight: 700;}
         .inv-select { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px; color: var(--text-main); font-size: 13px; outline: none; font-weight: 600; cursor: pointer;}
+        .broker-select { flex:1; width:100%; min-width:0; }
         
         .btn-delete { background-color: rgba(248, 113, 113, 0.1); color: var(--accent-red); border: 1px solid rgba(248, 113, 113, 0.2); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0;}
         .btn-delete:hover { background-color: rgba(248, 113, 113, 0.2); border-color: rgba(248, 113, 113, 0.5); }
         
         .btn-collateral { background-color: transparent; color: var(--text-sub); border: 1px solid var(--border-color); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.25s; flex-shrink: 0;}
         .btn-collateral.active { background-color: rgba(52, 211, 153, 0.15); color: var(--accent-green); border-color: var(--accent-green); box-shadow: 0 0 10px rgba(52, 211, 153, 0.2); }
+
+        .broker-manager-dialog { width:min(420px, calc(100vw - 32px)); border:1px solid var(--border-color); border-radius:16px; padding:20px; background:var(--card-bg); color:var(--text-main); box-shadow:0 18px 50px rgba(0,0,0,0.45); }
+        .broker-manager-dialog::backdrop { background:rgba(2,6,23,0.72); backdrop-filter:blur(3px); }
+        .broker-manager-title { font-size:17px; font-weight:800; margin:0 0 8px; }
+        .broker-manager-help { color:var(--text-sub); font-size:13px; line-height:1.55; margin:0 0 14px; }
+        .broker-manager-dialog select { width:100%; background:var(--input-bg); border:1px solid var(--border-color); border-radius:9px; padding:10px; color:var(--text-main); font-size:14px; }
+        .broker-manager-message { color:var(--status-watch); font-size:12px; line-height:1.5; min-height:18px; margin-top:10px; }
+        .broker-manager-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
 
         .inv-calc { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 13px; color: var(--text-sub); flex-wrap: wrap; }
         .inv-input-num { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 8px; color: var(--text-main); font-size: 13px; outline: none; text-align: right; width: 88px; font-weight: 600;}
@@ -488,7 +525,7 @@
 
 <div class="app-container">
     <div class="header">
-        <div>📈 終極曝險雷達 <span style="font-size:11px; color:var(--accent-cyan); font-weight:700;">V17.5</span></div>
+        <div>📈 終極曝險雷達 <span style="font-size:11px; color:var(--accent-cyan); font-weight:700;">V17.6</span></div>
         <div class="header-actions">
             <button id="btn-pwa-install" class="shield-toggle-btn" style="color:var(--accent-green); border-color:var(--accent-green); display:none;" onclick="installPWA()"><i class="fa-solid fa-mobile-screen-button"></i> 安裝 App</button>
             <button id="btn-sandbox" class="shield-toggle-btn" style="color:var(--accent-purple); border-color:var(--accent-purple);" onclick="toggleSandbox()"><i class="fa-solid fa-flask"></i> 平行沙盤</button>
@@ -510,7 +547,34 @@
         <div class="ticker-content" id="ui-ticker-text">系統連線中... 準備接收市場數據與戰情指令...</div>
     </div>
 
-    <!-- 頂部核心指揮艙 -->
+    <!-- 財務總覽：依資產負債表分成淨值、資產、負債三欄 -->
+    <section class="wealth-overview" aria-label="財務總覽">
+        <div class="wealth-overview-heading">
+            <div class="wealth-overview-title"><i class="fa-solid fa-wallet" style="color:var(--accent-blue); margin-right:7px;"></i>財務總覽</div>
+            <div class="wealth-overview-status" id="ui-overview-price-status" aria-live="polite">行情查詢：尚未查價</div>
+        </div>
+        <div class="wealth-overview-grid">
+            <div class="wealth-metric primary">
+                <div class="wealth-metric-label">淨資產</div>
+                <div class="wealth-metric-value blur-target" id="ui-net-worth" data-val="0">$0</div>
+                <div class="wealth-overview-note">資產總額扣除負債後的金額</div>
+            </div>
+            <div class="wealth-metric">
+                <div class="wealth-metric-label">總資產</div>
+                <div class="wealth-metric-value blur-target" id="ui-overview-total-assets" data-val="0">$0</div>
+                <div class="wealth-metric-detail"><span>投資資產</span><strong class="blur-target" id="ui-total-inv" data-val="0">$0</strong></div>
+                <div class="wealth-metric-detail" style="margin-top:0; padding-top:7px; border-top:none;"><span>現金</span><strong class="blur-target" id="ui-overview-cash" data-val="0">$0</strong></div>
+            </div>
+            <div class="wealth-metric">
+                <div class="wealth-metric-label">總負債</div>
+                <div class="wealth-metric-value blur-target" id="ui-overview-debt" data-val="0">$0</div>
+                <div class="wealth-metric-detail"><span>負債比</span><strong class="blur-target" id="ui-debt-ratio">0.0%</strong></div>
+            </div>
+        </div>
+        <div class="wealth-overview-note">行情查詢時間是最近一次成功取得股價的時間；休市期間可能仍是最近交易日價格。</div>
+    </section>
+
+    <!-- 頂部風險與配置摘要 -->
     <div style="padding: 0 15px;">
         <div class="card glow-card scanlines" style="margin-bottom: 12px; border-bottom: 4px solid var(--accent-blue); background: linear-gradient(180deg, var(--card-bg) 0%, rgba(15,23,42,0.85) 100%); position: relative;">
             
@@ -537,24 +601,12 @@
 
                 <div class="summary-table" style="position:relative; z-index: 10;">
                     <div class="summary-row">
-                        <div class="summary-cell label">投資總市值</div>
-                        <div class="summary-cell val blur-target" id="ui-total-inv" data-val="0">$0</div>
-                    </div>
-                    <div class="summary-row">
                         <div class="summary-cell label">股市總曝險額</div>
                         <div class="summary-cell val blur-target" id="ui-total-exp" data-val="0">$0</div>
                     </div>
                     <div class="summary-row">
-                        <div class="summary-cell label">當前總負債比 <span style="font-size: 11px; color: var(--text-sub);">(總負債/總資產)</span></div>
-                        <div class="summary-cell val blur-target" id="ui-debt-ratio" style="color:var(--accent-orange);">0.0%</div>
-                    </div>
-                    <div class="summary-row">
                         <div class="summary-cell label">當前流動比 <span style="font-size: 11px; color: var(--text-sub);">(流動資產/流動負債)</span></div>
                         <div class="summary-cell val blur-target" id="ui-current-ratio" style="color:var(--accent-green);">0.00</div>
-                    </div>
-                    <div class="summary-row" style="margin-top: 6px;">
-                        <div class="summary-cell label" style="color:var(--text-main); font-weight:700;">自有淨資產 (分母)</div>
-                        <div class="summary-cell val blur-target" id="ui-net-worth" data-val="0" style="font-size:20px; color:var(--accent-blue); font-weight:900;">$0</div>
                     </div>
                 </div>
             </div>
@@ -637,7 +689,7 @@
                     </div>
                 </div>
                 <div class="api-status" style="margin-bottom:8px;"><span id="ui-api-status">最新同步：尚未同步</span></div>
-                <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">點擊「🛡️」納入券商質押擔保品；支援自訂彈性槓桿倍率。</div>
+                <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">選擇券商或從選單新增／刪除；點擊「🛡️」納入質押擔保品，並可設定彈性槓桿倍率。</div>
                 <div id="stocks-container" class="blur-target"></div>
                 
                 <div class="section-title" style="margin:16px 0 4px; color:var(--accent-blue); font-size:14px;">台股個股持倉佔比</div>
@@ -1031,7 +1083,7 @@
                     <div class="section-title" style="color:var(--accent-blue);">📱 PWA 離線桌面化封裝中樞</div>
                 </div>
                 <p style="font-size:12px; color:var(--text-sub); line-height:1.5; margin-bottom:12px;">
-                    部署至 <b>GitHub Pages</b> 後，下載並覆蓋同資料夾內的 <code>sw.js</code> 與 <code>manifest.json</code>，HTML 檔名請維持下載這兩個檔案時的名稱。新版只快取網站檔案，GAS 與行情 API 一律直接連線，避免讀到舊資料；離線時仍可開啟已快取的網頁，但無法同步或更新行情。
+                    部署至 <b>GitHub Pages</b> 時，請一併上傳或覆蓋本 HTML、<code>sw.js</code> 與 <code>manifest.json</code>，三個檔案放在同一資料夾；HTML 檔名請維持產生 <code>sw.js</code> 與 <code>manifest.json</code> 時使用的名稱。新版 Service Worker 啟用後會更新網頁快取；GAS 與行情 API 一律直接連線。離線時仍可開啟已快取的網頁，但無法同步或更新行情。
                 </p>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button class="btn-add" style="flex:1;" onclick="downloadPWAFile('manifest')"><i class="fa-solid fa-file-code"></i> 下載 manifest.json</button>
@@ -1183,7 +1235,7 @@
         </div>
     </div>
 
-    <div class="footer">曝險雷達 V17.5<br><span style="font-size:11px; opacity:0.7;">簡潔與詳細檢視 · 本機備份與雲端同步</span></div>
+    <div class="footer">曝險雷達 V17.6<br><span style="font-size:11px; opacity:0.7;">簡潔與詳細檢視 · 本機備份與雲端同步</span></div>
 </div>
 
 <div class="fab-container" id="ui-fab-container">
@@ -1205,12 +1257,24 @@
     <div class="bottom-nav-item" onclick="showTab('tab-settings')"><i class="fa-solid fa-cloud-arrow-up"></i><span>雲端</span></div>
 </div>
 
+<dialog id="broker-manager-dialog" class="broker-manager-dialog" aria-labelledby="broker-manager-title">
+    <h2 id="broker-manager-title" class="broker-manager-title">刪除券商</h2>
+    <p class="broker-manager-help">選擇要從券商清單移除的名稱。仍有持倉使用中的券商，需先為該持倉改選其他券商。</p>
+    <select id="broker-delete-select" aria-label="選擇要刪除的券商"></select>
+    <div id="broker-manager-message" class="broker-manager-message" role="status" aria-live="polite"></div>
+    <div class="broker-manager-actions">
+        <button type="button" class="btn-add" onclick="closeBrokerManagerDialog()">取消</button>
+        <button type="button" class="btn-delete" style="width:auto; padding:0 14px;" onclick="deleteSelectedBroker()"><i class="fa-solid fa-trash-can" style="margin-right:6px;"></i>刪除券商</button>
+    </div>
+</dialog>
+
 <script>
     var usdTwdRate = 32.50; 
     var realStateBackup = null; 
     var isAppReady = false; 
     var animFrames = {}; 
     var deferredPwaPrompt = null;
+    var DEFAULT_BROKERS = ['元大證券', '元大證金', '永豐證券'];
     var state = {
         cash: 1909350, targetRatio: 100, toleranceRatio: 5, targetNetWorth: 10000000, gasUrl: "", 
         autoGlidepath: false, glideMax: 200, glideMin: 100, vix: 15.0, dynamicSafeLine: 0,
@@ -1218,7 +1282,7 @@
         rebalanceTargetInv: 50,
         kellyMu: 8.0, kellySigma: 18.0, mcYears: 10, mcMu: 8.0, mcSigma: 18.0, mcPmt: 30000,
         livingExpense: 30000, blindMode: false, warRoomMode: false, sandboxMode: false,
-        accounts: [], debts: [], stocks: [], funds: [], notes: [], history: [], marketPrices: {}, detailedView: false,
+        accounts: [], debts: [], stocks: [], funds: [], notes: [], history: [], marketPrices: {}, brokers: DEFAULT_BROKERS.slice(), detailedView: false,
         achievements: { first_blood: false, nw_1m: false, nw_5m: false, runway_6m: false, debt_light: false, perfect_exp: false },
         tacticsOrder: ['widget-rebalance', 'widget-dca', 'widget-vix', 'widget-dampener', 'widget-kelly', 'widget-glide', 'widget-manual'],
         tacticsPinned: []
@@ -1333,7 +1397,7 @@ function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
 
     function getManifestObject() {
         return {
-            name: "曝險雷達 V17.5",
+            name: "曝險雷達 V17.6",
             short_name: "曝險雷達",
             description: "終身財富規劃與極限曝險雷達戰情室",
             start_url: getAppPagePath(),
@@ -1384,7 +1448,7 @@ function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
             filename = "manifest.json";
         } else {
             filename = "sw.js";
-            content = `const CACHE_NAME = 'exposure-radar-v17-5-cache';
+            content = `const CACHE_NAME = 'exposure-radar-v17-6-cache';
 const CACHE_PREFIX = 'exposure-radar-';
 const APP_PAGE = './${encodeURIComponent(decodeURIComponent(location.pathname.split('/').pop() || 'index.html'))}';
 const APP_SHELL = [APP_PAGE, './manifest.json'];
@@ -1606,6 +1670,11 @@ self.addEventListener('fetch', event => {
         });
     }
     function safeAttr(value) { return escapeHTML(value).replace(/`/g, '&#96;'); }
+    function normalizeBrokerList(brokers, stocks) {
+        var legacyNames = Array.isArray(stocks) ? stocks.map(function(stock) { return stock && stock.broker; }) : [];
+        var baseNames = Array.isArray(brokers) ? brokers : DEFAULT_BROKERS;
+        return Array.from(new Set(baseNames.concat(legacyNames).map(function(name) { return String(name || '').trim(); }).filter(Boolean)));
+    }
     function getLocalDateString(date = new Date()) {
         var y = date.getFullYear();
         var m = String(date.getMonth() + 1).padStart(2, '0');
@@ -1618,6 +1687,7 @@ self.addEventListener('fetch', event => {
         ['accounts','debts','stocks','funds','notes','history'].forEach(key => {
             if (!Array.isArray(normalized[key])) normalized[key] = [];
         });
+        normalized.brokers = normalizeBrokerList(normalized.brokers, normalized.stocks);
         if (normalized.marketPrices !== undefined && (!normalized.marketPrices || typeof normalized.marketPrices !== 'object' || Array.isArray(normalized.marketPrices))) {
             throw new Error('備份檔的 marketPrices 格式不正確');
         }
@@ -1652,11 +1722,13 @@ self.addEventListener('fetch', event => {
             if (saved) { 
                 var parsed = JSON.parse(saved);
                 if (parsed) {
-                    ['accounts','debts','stocks','funds','notes','history','marketPrices','achievements','tacticsOrder','tacticsPinned'].forEach(k => { if(parsed[k]) state[k] = parsed[k]; });
+                    ['accounts','debts','stocks','funds','notes','history','marketPrices','brokers','achievements','tacticsOrder','tacticsPinned'].forEach(k => { if(parsed[k]) state[k] = parsed[k]; });
+                    state.brokers = normalizeBrokerList(state.brokers, state.stocks);
                     ['cash','targetRatio','toleranceRatio','targetNetWorth','glideMax','glideMin','vix','biasRatio','kellyMu','kellySigma','mcYears','mcMu','mcSigma','mcPmt','livingExpense','rebalanceTargetInv'].forEach(k => { if(parsed[k] !== undefined) state[k] = parseFloat(parsed[k]); });
                     ['autoGlidepath','autoDampener','blindMode','warRoomMode','detailedView'].forEach(k => { if(parsed[k] !== undefined) state[k] = parsed[k]; });
                     state.marketPrices = Object.assign({}, state.marketPrices || {}, parsed.marketPrices || {});
                     if (parsed.lastSyncTime) state.lastSyncTime = parsed.lastSyncTime;
+                    if (parsed.lastPriceSyncTime) state.lastPriceSyncTime = parsed.lastPriceSyncTime;
                     state.sandboxMode = false; state.gasUrl = parsed.gasUrl || state.gasUrl;
                 }
             }
@@ -1824,6 +1896,7 @@ self.addEventListener('fetch', event => {
                 var localMarketPrices = Object.assign({}, state.marketPrices || {});
                 Object.keys(incomingState).forEach(k => { state[k] = incomingState[k]; });
                 state.marketPrices = Object.assign({}, localMarketPrices, incomingState.marketPrices || {});
+                state.lastPriceSyncTime = incomingState.lastPriceSyncTime || null;
                 var priceUpdates = applyMarketPricesToStocks();
                 state.sandboxMode = false;
                 state.lastSyncTime = new Date().toLocaleString('zh-TW', { hour12: false });
@@ -1835,9 +1908,9 @@ self.addEventListener('fetch', event => {
     }
 
     function exportToFile() {
-        var exportState = Object.assign({}, state, { backupVersion: 'v17.5-pwa-network-first', exportedAt: new Date().toISOString() });
+        var exportState = Object.assign({}, state, { backupVersion: 'v17.6-broker-management', exportedAt: new Date().toISOString() });
         var blob = new Blob([JSON.stringify(exportState, null, 2)], { type: "application/json" }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = `exposure_backup_v17_5_${getLocalDateString()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        a.download = `exposure_backup_v17_6_${getLocalDateString()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
     
     function importFromFile(event) {
@@ -1847,7 +1920,7 @@ self.addEventListener('fetch', event => {
                 var incoming = normalizeStateShape(JSON.parse(e.target.result)); 
                 if (!confirm(`即將匯入備份檔並覆蓋目前資料，確定繼續嗎？`)) return;
                 createRestorePoint('before-import');
-                Object.assign(state, incoming); state.sandboxMode = false; saveData(); location.reload(); 
+                Object.assign(state, incoming); state.lastPriceSyncTime = incoming.lastPriceSyncTime || null; state.sandboxMode = false; saveData(); location.reload(); 
             } catch(err) { alert("檔案讀取失敗：" + err.message); } finally { event.target.value = ''; }
         };
         reader.readAsText(file);
@@ -1898,11 +1971,38 @@ self.addEventListener('fetch', event => {
         var firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
         var daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
         var monthStr = currentCalYear + '年 ' + (currentCalMonth + 1) + '月';
+        var monthStart = currentCalYear + '-' + String(currentCalMonth + 1).padStart(2, '0') + '-01';
+        var monthRecords = sorted.filter(function(record) { return record.date >= monthStart && record.date <= currentCalYear + '-' + String(currentCalMonth + 1).padStart(2, '0') + '-' + String(daysInMonth).padStart(2, '0'); });
+        var previousMonthRecords = sorted.filter(function(record) { return record.date < monthStart; });
+        var monthChange = null;
+        var monthChangeLabel = '';
+        if (monthRecords.length > 0) {
+            var monthBaseline = previousMonthRecords.length > 0 ? previousMonthRecords[previousMonthRecords.length - 1] : monthRecords[0];
+            var monthLatest = monthRecords[monthRecords.length - 1];
+            monthChange = Number(monthLatest.netWorth) - Number(monthBaseline.netWorth);
+            monthChangeLabel = previousMonthRecords.length > 0 ? '本月淨值變化' : '本月首筆起算';
+        }
+        var monthChangeColor = monthChange === null ? 'var(--text-sub)' : (monthChange > 0 ? 'var(--status-alert)' : (monthChange < 0 ? 'var(--status-safe)' : 'var(--text-sub)'));
+        var monthChangeText = monthChange === null ? '本月尚無快照' : (monthChange >= 0 ? '+' : '-') + '$' + formatNum(Math.abs(monthChange));
+        var thisYear = new Date().getFullYear();
+        var yearStart = thisYear + '-01-01';
+        var yearRecords = sorted.filter(function(record) { return record.date >= yearStart && record.date <= thisYear + '-12-31'; });
+        var previousYearRecords = sorted.filter(function(record) { return record.date < yearStart; });
+        var yearChange = null;
+        var yearChangeLabel = thisYear + ' 年以來';
+        if (yearRecords.length > 0) {
+            var yearBaseline = previousYearRecords.length > 0 ? previousYearRecords[previousYearRecords.length - 1] : yearRecords[0];
+            var yearLatest = yearRecords[yearRecords.length - 1];
+            yearChange = Number(yearLatest.netWorth) - Number(yearBaseline.netWorth);
+            if (previousYearRecords.length === 0) yearChangeLabel += '（首筆起算）';
+        }
+        var yearChangeColor = yearChange === null ? 'var(--text-sub)' : (yearChange > 0 ? 'var(--status-alert)' : (yearChange < 0 ? 'var(--status-safe)' : 'var(--text-sub)'));
+        var yearChangeText = yearChange === null ? '今年尚無快照' : (yearChange >= 0 ? '+' : '-') + '$' + formatNum(Math.abs(yearChange));
 
         var html = '<div style="background: rgba(15,23,42,0.6); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);">' +
                    '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">' +
                    '<button onclick="changeCalMonth(-1)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--accent-blue); width:36px; height:36px; border-radius:50%; cursor:pointer;"><i class="fa-solid fa-chevron-left"></i></button>' +
-                   '<div style="font-size:18px; font-weight:900; color:var(--text-main);">' + monthStr + ' <span style="font-size:12px; color:var(--text-sub);">(' + sorted.length + ' 筆)</span></div>' +
+                   '<div style="font-size:18px; font-weight:900; color:var(--text-main);">' + monthStr + ' <span style="font-size:12px; color:var(--text-sub);">(' + sorted.length + ' 筆)</span><div style="font-size:12px; font-weight:700; color:' + monthChangeColor + '; margin-top:3px;">' + monthChangeLabel + '：' + monthChangeText + '</div><div style="font-size:12px; font-weight:700; color:' + yearChangeColor + '; margin-top:2px;">' + yearChangeLabel + '：' + yearChangeText + '</div></div>' +
                    '<button onclick="changeCalMonth(1)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--accent-blue); width:36px; height:36px; border-radius:50%; cursor:pointer;"><i class="fa-solid fa-chevron-right"></i></button>' +
                    '</div><div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; text-align:center;">';
 
@@ -1920,11 +2020,11 @@ self.addEventListener('fetch', event => {
                     cellStyle += 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);';
                     innerHtml = '<div style="font-size:13px; font-weight:800; color:#fff;">' + day + '</div><div style="font-size:10px; color:var(--accent-blue);">首筆</div>';
                 } else if (rec.diff >= 0) {
-                    cellStyle += 'background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.28);';
-                    innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--status-safe);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--status-safe);">+' + (rec.diff/10000).toFixed(1) + '萬</div>';
-                } else {
                     cellStyle += 'background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.28);';
-                    innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--status-alert);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--status-alert);">-' + (Math.abs(rec.diff)/10000).toFixed(1) + '萬</div>';
+                    innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--status-alert);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--status-alert);">+' + (rec.diff/10000).toFixed(1) + '萬</div>';
+                } else {
+                    cellStyle += 'background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.28);';
+                    innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--status-safe);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--status-safe);">-' + (Math.abs(rec.diff)/10000).toFixed(1) + '萬</div>';
                 }
             }
             html += '<div style="' + cellStyle + '" ' + (rec ? 'onclick="showSnapshotDetails(\'' + dateStr + '\')"' : '') + '>' + innerHtml + '</div>';
@@ -1969,8 +2069,86 @@ self.addEventListener('fetch', event => {
         var container = document.getElementById('stocks-container'); if(!container) return;
         if (!state.stocks || state.stocks.length === 0) { container.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:13px; padding:15px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">掃描無結果，陣列為空。</div>'; return; }
         var totalInvestment = getTotalStockValue();
-        container.innerHTML = state.stocks.map((stock, index) => { var stockValue = (parseFloat(stock.shares)||0) * (parseFloat(stock.price)||0); var allocation = totalInvestment > 0 ? (stockValue / totalInvestment) * 100 : 0; return `<div class="inventory-card"><div class="inv-header"><button class="btn-collateral ${stock.isCollateral ? 'active' : ''}" onclick="toggleCollateral('stocks', ${index})" title="設為質押擔保品"><i class="fa-solid fa-shield-halved"></i></button><input type="text" class="inv-input-text" data-type="stock" data-idx="${index}" data-field="broker" value="${safeAttr(stock.broker || '')}" placeholder="券商/備註"><input type="text" class="inv-input-code" data-type="stock" data-idx="${index}" data-field="code" value="${safeAttr(stock.code || '')}" placeholder="代碼"><select class="inv-select" data-type="stock" data-idx="${index}" data-field="mult"><option value="1" ${stock.mult==1?'selected':''}>1x</option><option value="1.5" ${stock.mult==1.5?'selected':''}>1.5x</option><option value="2" ${stock.mult==2?'selected':''}>2x</option><option value="3" ${stock.mult==3?'selected':''}>3x</option><option value="0" ${stock.mult==0?'selected':''}>0x</option></select><button class="btn-delete" onclick="removeStock(${index})"><i class="fa-solid fa-trash-can"></i></button></div><div class="inv-calc"><div style="display:flex; align-items:center; gap:5px;"><input type="number" class="inv-input-num blur-target" data-type="stock" data-idx="${index}" data-field="shares" value="${safeAttr(stock.shares)}"> 股 × <input type="number" class="inv-input-num" data-type="stock" data-idx="${index}" data-field="price" value="${safeAttr(stock.price)}" step="any"> 元</div><div style="display:flex; flex-direction:column; align-items:flex-end;"><div class="inv-value blur-target" id="stock-val-${index}">=$${formatNum(stockValue)}</div><div style="font-size:11px; color:var(--text-sub); font-weight:700;">佔比 <span id="stock-allocation-${index}" style="color:var(--accent-cyan);">${allocation.toFixed(1)}%</span></div></div></div></div>`; }).join('');
+        state.brokers = normalizeBrokerList(state.brokers, state.stocks);
+        container.innerHTML = state.stocks.map((stock, index) => {
+            var stockValue = (parseFloat(stock.shares)||0) * (parseFloat(stock.price)||0);
+            var allocation = totalInvestment > 0 ? (stockValue / totalInvestment) * 100 : 0;
+            return `<div class="inventory-card"><div class="inv-header"><button class="btn-collateral ${stock.isCollateral ? 'active' : ''}" onclick="toggleCollateral('stocks', ${index})" title="設為質押擔保品"><i class="fa-solid fa-shield-halved"></i></button><select class="inv-select broker-select" data-type="stock" data-idx="${index}" data-field="broker" onchange="handleStockBrokerChange(${index}, this)" aria-label="券商名稱">${renderBrokerOptions(stock.broker || '')}</select><input type="text" class="inv-input-code" data-type="stock" data-idx="${index}" data-field="code" value="${safeAttr(stock.code || '')}" placeholder="代碼"><select class="inv-select" data-type="stock" data-idx="${index}" data-field="mult"><option value="1" ${stock.mult==1?'selected':''}>1x</option><option value="1.5" ${stock.mult==1.5?'selected':''}>1.5x</option><option value="2" ${stock.mult==2?'selected':''}>2x</option><option value="3" ${stock.mult==3?'selected':''}>3x</option><option value="0" ${stock.mult==0?'selected':''}>0x</option></select><button class="btn-delete" onclick="removeStock(${index})"><i class="fa-solid fa-trash-can"></i></button></div><div class="inv-calc"><div style="display:flex; align-items:center; gap:5px;"><input type="number" class="inv-input-num blur-target" data-type="stock" data-idx="${index}" data-field="shares" value="${safeAttr(stock.shares)}"> 股 × <input type="number" class="inv-input-num" data-type="stock" data-idx="${index}" data-field="price" value="${safeAttr(stock.price)}" step="any"> 元</div><div style="display:flex; flex-direction:column; align-items:flex-end;"><div class="inv-value blur-target" id="stock-val-${index}">=$${formatNum(stockValue)}</div><div style="font-size:11px; color:var(--text-sub); font-weight:700;">佔比 <span id="stock-allocation-${index}" style="color:var(--accent-cyan);">${allocation.toFixed(1)}%</span></div></div></div></div>`;
+        }).join('');
         attachListListeners(container);
+    }
+
+    function renderBrokerOptions(currentBroker) {
+        var brokers = normalizeBrokerList(state.brokers, state.stocks);
+        var options = '<option value="" disabled ' + (currentBroker ? '' : 'selected') + '>選擇券商</option>';
+        options += brokers.map(function(broker) {
+            return '<option value="' + safeAttr(broker) + '" ' + (broker === currentBroker ? 'selected' : '') + '>' + escapeHTML(broker) + '</option>';
+        }).join('');
+        options += '<option value="__add_broker__">＋ 新增券商…</option>';
+        options += '<option value="__delete_broker__">－ 刪除券商…</option>';
+        return options;
+    }
+
+    function handleStockBrokerChange(index, select) {
+        if (!state.stocks[index]) return;
+        var selectedBroker = select.value;
+        if (selectedBroker === '__delete_broker__') {
+            select.value = state.stocks[index].broker || '';
+            openBrokerManagerDialog();
+            return;
+        }
+        if (selectedBroker === '__add_broker__') {
+            var previousBroker = state.stocks[index].broker || '';
+            var newBroker = prompt('請輸入要新增的券商名稱：', '');
+            if (newBroker === null || !newBroker.trim()) { select.value = previousBroker; return; }
+            newBroker = newBroker.trim();
+            state.brokers = normalizeBrokerList(state.brokers, state.stocks);
+            if (!state.brokers.includes(newBroker)) state.brokers.push(newBroker);
+            selectedBroker = newBroker;
+        }
+        state.stocks[index].broker = selectedBroker;
+        state.brokers = normalizeBrokerList(state.brokers, state.stocks);
+        saveData();
+        renderStocks();
+    }
+
+    function openBrokerManagerDialog() {
+        var dialog = document.getElementById('broker-manager-dialog');
+        var select = document.getElementById('broker-delete-select');
+        var message = document.getElementById('broker-manager-message');
+        if (!dialog || !select) return;
+        state.brokers = normalizeBrokerList(state.brokers, state.stocks);
+        select.innerHTML = state.brokers.map(function(broker) {
+            return '<option value="' + safeAttr(broker) + '">' + escapeHTML(broker) + '</option>';
+        }).join('');
+        if (message) message.innerText = state.brokers.length ? '' : '目前沒有可刪除的券商。';
+        var deleteButton = dialog.querySelector('.broker-manager-actions .btn-delete');
+        if (deleteButton) deleteButton.disabled = state.brokers.length === 0;
+        if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open', '');
+    }
+
+    function closeBrokerManagerDialog() {
+        var dialog = document.getElementById('broker-manager-dialog');
+        if (dialog && dialog.open) { if (typeof dialog.close === 'function') dialog.close(); else dialog.removeAttribute('open'); }
+    }
+
+    function deleteSelectedBroker() {
+        var select = document.getElementById('broker-delete-select');
+        var message = document.getElementById('broker-manager-message');
+        if (!select || !select.value) return;
+        var broker = select.value;
+        var usedStocks = (state.stocks || []).filter(function(stock) { return String(stock.broker || '').trim() === broker; });
+        if (usedStocks.length) {
+            var usedNames = usedStocks.map(function(stock) { return stock.code || '未填代碼'; }).join('、');
+            if (message) message.innerText = '此券商仍用於 ' + usedStocks.length + ' 筆持倉（' + usedNames + '），請先改選其他券商。';
+            return;
+        }
+        if (!confirm('確定要從券商清單刪除「' + broker + '」嗎？')) return;
+        state.brokers = (state.brokers || []).filter(function(name) { return name !== broker; });
+        state.brokers = normalizeBrokerList(state.brokers, state.stocks);
+        saveData();
+        renderStocks();
+        closeBrokerManagerDialog();
     }
 
     function getTotalStockValue() { return (state.stocks || []).reduce((sum, s) => sum + ((parseFloat(s.shares) || 0) * (parseFloat(s.price) || 0)), 0); }
@@ -2003,6 +2181,7 @@ self.addEventListener('fetch', event => {
         container.querySelectorAll('input, select').forEach(input => {
             input.addEventListener('input', function(e) {
                 var type = e.target.getAttribute('data-type'), idx = parseInt(e.target.getAttribute('data-idx')), field = e.target.getAttribute('data-field'), val = e.target.value;
+                if (type === 'stock' && field === 'broker') return;
                 if (type === 'stock') { state.stocks[idx][field] = (field === 'shares' || field === 'price' || field === 'mult') ? (parseFloat(val) || 0) : val; if (field === 'shares' || field === 'price') { var valEl = document.getElementById(`stock-val-${idx}`); if(valEl) valEl.innerText = '=$' + formatNum((parseFloat(state.stocks[idx].shares)||0) * (parseFloat(state.stocks[idx].price)||0)); } } else if (type === 'fund') { state.funds[idx][field] = (field === 'value' || field === 'mult') ? (parseFloat(val) || 0) : val; }
                 updateTotals();
             });
@@ -2079,9 +2258,10 @@ self.addEventListener('fetch', event => {
             alert('目前無法取得輸入代碼的最新股價；原有價格已保留。請確認代碼或稍後再試。');
             return;
         }
-        state.lastSyncTime = new Date().toLocaleString('zh-TW', { hour12: false });
+        state.lastPriceSyncTime = new Date().toLocaleString('zh-TW', { hour12: false });
+        state.lastSyncTime = state.lastPriceSyncTime;
         saveData(); renderStocks(); updateTotals();
-        var status = document.getElementById('ui-api-status'); if (status) status.innerText = '最新同步：' + state.lastSyncTime;
+        var status = document.getElementById('ui-api-status'); if (status) status.innerText = '最近成功查價：' + state.lastPriceSyncTime;
         if (btn) { btn.disabled = false; btn.innerHTML = original; }
         alert('股價更新完成，已更新 ' + updated + ' 個股票部位。');
     }
@@ -2351,8 +2531,11 @@ self.addEventListener('fetch', event => {
 
         var netWorth = (totalInv + totalCashSum) - totalDebt, ratioRaw = netWorth > 0 ? (totalExp / netWorth) * 100 : 0;
         var apiStatusEl = document.getElementById('ui-api-status');
-        if (apiStatusEl) apiStatusEl.innerText = '最新同步：' + (state.lastSyncTime || '尚未同步');
-        animateNumber('ui-total-inv', totalInv, '$'); animateNumber('ui-total-exp', totalExp, '$'); animateNumber('ui-net-worth', netWorth, '$'); animateNumber('ui-exposure-ratio', ratioRaw, '', '%', 2); 
+        var lastPriceSyncText = state.lastPriceSyncTime || '尚未查價';
+        if (apiStatusEl) apiStatusEl.innerText = '最近成功查價：' + lastPriceSyncText;
+        var overviewPriceStatus = document.getElementById('ui-overview-price-status');
+        if (overviewPriceStatus) overviewPriceStatus.innerText = '行情查詢：' + lastPriceSyncText;
+        animateNumber('ui-total-inv', totalInv, '$'); animateNumber('ui-total-exp', totalExp, '$'); animateNumber('ui-net-worth', netWorth, '$'); animateNumber('ui-overview-total-assets', totalInv + totalCashSum, '$'); animateNumber('ui-overview-cash', totalCashSum, '$'); animateNumber('ui-overview-debt', totalDebt, '$'); animateNumber('ui-exposure-ratio', ratioRaw, '', '%', 2); 
 
         var totalAssetsPool = totalInv + totalCashSum, cashPct = totalAssetsPool > 0 ? (totalCashSum / totalAssetsPool) * 100 : 0, invPct = totalAssetsPool > 0 ? (totalInv / totalAssetsPool) * 100 : 0, debtRatio = totalAssetsPool > 0 ? (totalDebt / totalAssetsPool) * 100 : 0;
         var elDebtRatio = document.getElementById('ui-debt-ratio'); if (elDebtRatio) elDebtRatio.innerText = `${debtRatio.toFixed(1)}%`;
