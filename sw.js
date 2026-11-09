@@ -1,18 +1,40 @@
-const CACHE_NAME = 'exposure-radar-v17-6-cache';
+/* 曝險雷達 Service Worker
+   - 網頁本體與圖示：network-first（有網路永遠拿最新版，網路失敗才用快取，所以離線也能開）。
+   - GAS 雲端、證交所／櫃買行情、匯率等動態或跨網域請求：完全不攔截，直接連線。
+   - 這個檔案與 index.html 放在同一個資料夾即可，網頁檔名不限（不再需要從網頁裡下載產生）。
+   - 改版時若只是更新 index.html，不必動這裡；要讓所有人清掉舊快取時，才把 CACHE_NAME 的數字加 1。 */
+const CACHE_NAME = 'exposure-radar-shell-v2';
 const CACHE_PREFIX = 'exposure-radar-';
-const APP_PAGE = './index.html';
-const APP_SHELL = [APP_PAGE, './manifest.json'];
+
+/* 網頁用到的第三方檔案（版本固定，必須和 index.html 裡的網址一字不差；之後改網頁裡的版本號時，這裡要一起改） */
 const STATIC_CDN_ASSETS = [
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+  'https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js',
+  'https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-solid-900.woff2',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-regular-400.woff2'
 ];
+/* 同一個資料夾裡的其他檔案（有就快取，沒有也不影響安裝） */
+const OWN_ASSETS = ['./manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
+
+const APP_PAGE = new URL('./', self.registration.scope).href;       // 資料夾首頁（例如 https://名稱.github.io/repo/）
+const APP_INDEX = new URL('./index.html', APP_PAGE).href;
+const OWN_ASSET_URLS = OWN_ASSETS.map(path => new URL(path, APP_PAGE).href);
+
+/* 同一個頁面不管帶什麼 ?參數 或 #錨點，都存成同一份 */
+function pageKey(url) {
+  const u = new URL(url.href);
+  u.search = '';
+  u.hash = '';
+  return u.href;
+}
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    await cache.addAll(APP_SHELL);
-    await Promise.all(STATIC_CDN_ASSETS.map(url =>
+    // 只有資料夾首頁是必要的；其他檔案抓不到（例如還沒上傳圖示）不應該讓整個 Service Worker 裝不起來
+    await cache.add(new Request(APP_PAGE, { cache: 'reload' }));
+    await Promise.all(OWN_ASSET_URLS.concat(STATIC_CDN_ASSETS).map(url =>
       cache.add(new Request(url, { cache: 'reload' })).catch(() => null)
     ));
     await self.skipWaiting();
@@ -36,30 +58,37 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   const sameOrigin = url.origin === self.location.origin;
   const isAppNavigation = sameOrigin && request.mode === 'navigate';
-  const isManifest = sameOrigin && url.pathname.endsWith('/manifest.json');
+  const isOwnAsset = OWN_ASSET_URLS.includes(url.href);
   const isStaticCdnAsset = STATIC_CDN_ASSETS.includes(url.href);
 
-  // GAS、交易所、Yahoo 與其他動態／跨網域請求完全略過 SW，直接由網路回應。
-  if (!isAppNavigation && !isManifest && !isStaticCdnAsset) return;
+  // GAS、交易所、匯率與其他動態／跨網域請求完全略過 SW，直接由網路回應。
+  if (!isAppNavigation && !isOwnAsset && !isStaticCdnAsset) return;
+
+  const cacheKey = isAppNavigation ? pageKey(url) : request.url;
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
+    let response;
     try {
-      // Network first: 有網路時永遠取最新頁面或靜態 CDN 檔案。
-      const response = await fetch(request, { cache: 'no-store' });
-      if (response.ok && (response.type === 'basic' || response.type === 'cors')) {
-        await cache.put(request, response.clone());
-      }
-      return response;
+      // Network first: 有網路時永遠取最新頁面或檔案。
+      response = await fetch(request, { cache: 'no-store' });
     } catch (error) {
-      // 只有網路失敗時才回退到快取，支援離線開啟網站外殼。
-      const cached = await cache.match(request);
+      // 只有網路失敗時才回退到快取，支援離線開啟。
+      const cached = await cache.match(cacheKey);
       if (cached) return cached;
       if (isAppNavigation) {
-        const fallback = await cache.match(new URL(APP_PAGE, self.registration.scope).href);
+        const fallback = (await cache.match(APP_PAGE)) || (await cache.match(APP_INDEX));
         if (fallback) return fallback;
       }
       throw error;
     }
+    if (response.ok && (response.type === 'basic' || response.type === 'cors')) {
+      try {
+        await cache.put(cacheKey, response.clone());
+        // 開 index.html 與開資料夾首頁是同一份內容，兩邊都更新，離線時才不會拿到舊的
+        if (cacheKey === APP_INDEX) await cache.put(APP_PAGE, response.clone());
+      } catch (error) { /* 快取寫入失敗（例如空間不足）不影響這次正常顯示 */ }
+    }
+    return response;
   })());
 });
