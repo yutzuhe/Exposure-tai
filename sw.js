@@ -2,8 +2,9 @@
    - 網頁本體與圖示：network-first（有網路永遠拿最新版，網路失敗才用快取，所以離線也能開）。
    - GAS 雲端、證交所／櫃買行情、匯率等動態或跨網域請求：完全不攔截，直接連線。
    - 這個檔案與 index.html 放在同一個資料夾即可，網頁檔名不限（不再需要從網頁裡下載產生）。
-   - 改版時若只是更新 index.html，不必動這裡；要讓所有人清掉舊快取時，才把 CACHE_NAME 的數字加 1。 */
-const CACHE_NAME = 'exposure-radar-shell-v2';
+   - 改版時若只是更新 index.html、css/ 或 js/ 裡的內容，不必動這裡；要讓所有人清掉舊快取時，才把 CACHE_NAME 的數字加 1。
+   - 新增、刪除或改名 css/、js/ 底下的檔案時：OWN_ASSETS 要一起改（離線能不能開，就靠這份清單），CACHE_NAME 也加 1。 */
+const CACHE_NAME = 'exposure-radar-shell-v3';
 const CACHE_PREFIX = 'exposure-radar-';
 
 /* 網頁用到的第三方檔案（版本固定，必須和 index.html 裡的網址一字不差；之後改網頁裡的版本號時，這裡要一起改） */
@@ -15,7 +16,15 @@ const STATIC_CDN_ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-regular-400.woff2'
 ];
 /* 同一個資料夾裡的其他檔案（有就快取，沒有也不影響安裝） */
-const OWN_ASSETS = ['./manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
+const OWN_ASSETS = [
+  './manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png',
+  /* 樣式（要和 index.html 裡的 <link> 一致） */
+  './css/base.css', './css/layout.css', './css/components.css', './css/widgets.css',
+  /* 程式（要和 index.html 裡的 <script src> 一致；順序不影響快取） */
+  './js/schema.js', './js/state.js', './js/core.js', './js/utils.js', './js/charts.js', './js/ui.js',
+  './js/pwa.js', './js/storage.js', './js/gas.js', './js/lifecycle.js', './js/history.js', './js/snapshots.js',
+  './js/holdings.js', './js/pnl.js', './js/next-action.js', './js/dashboard.js', './js/main.js'
+];
 
 const APP_PAGE = new URL('./', self.registration.scope).href;       // 資料夾首頁（例如 https://名稱.github.io/repo/）
 const APP_INDEX = new URL('./index.html', APP_PAGE).href;
