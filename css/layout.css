@@ -1,0 +1,73 @@
+/* css/layout.css — 12 欄 Bento Grid 戰情室版面與各個斷點。
+   四個 CSS 檔要照 index.html 裡的順序載入（後面的規則可以蓋掉前面的）。 */
+        /* =========================================================
+           12 欄全息 Bento Grid 桌面戰情室佈局
+           ========================================================= */
+        body.war-room-mode { padding-bottom: 30px; }
+        body.war-room-mode .app-container { max-width: 1680px; padding: 0 18px; } 
+        body.war-room-mode .nav-wrapper,
+        body.war-room-mode .bottom-nav,
+        body.war-room-mode .fab-container,
+        body.war-room-mode #tab-notes { display: none !important; }
+        
+        body.war-room-mode #tab-overview,
+        body.war-room-mode #tab-details,
+        body.war-room-mode #tab-cashflow,
+        body.war-room-mode #tab-tactics,
+        body.war-room-mode #tab-risk,
+        body.war-room-mode #tab-settings,
+        body.war-room-mode #tactics-pinned-area,
+        body.war-room-mode #tactics-unpinned-area {
+            display: contents !important;
+        }
+        body.war-room-mode #tactics-divider { display: none !important; }
+
+        body.war-room-mode .war-room-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            align-items: start;
+            margin-top: 12px;
+        }
+        body.war-room-mode .card { margin-bottom: 0; min-width: 0; }
+
+        body.war-room-mode .bento-span-12 { grid-column: span 12; }
+        body.war-room-mode .bento-span-8  { grid-column: span 12; }
+        body.war-room-mode .bento-span-6  { grid-column: span 12; }
+        body.war-room-mode .bento-span-4  { grid-column: span 12; }
+        body.war-room-mode .bento-span-3  { grid-column: span 12; }
+
+        @media (min-width: 768px) {
+            body.war-room-mode .bento-span-8  { grid-column: span 12; }
+            body.war-room-mode .bento-span-6  { grid-column: span 6; }
+            body.war-room-mode .bento-span-4  { grid-column: span 6; }
+            body.war-room-mode .bento-span-3  { grid-column: span 6; }
+            body.war-room-mode .hero-bento-grid {
+                display: grid;
+                grid-template-columns: 1.1fr 1fr 1.2fr;
+                gap: 20px;
+                align-items: center;
+            }
+        }
+        @media (min-width: 1200px) {
+            body.war-room-mode .bento-span-8  { grid-column: span 8; }
+            body.war-room-mode .bento-span-6  { grid-column: span 6; }
+            body.war-room-mode .bento-span-4  { grid-column: span 4; }
+            body.war-room-mode .bento-span-3  { grid-column: span 3; }
+        }
+
+        .war-room-section-banner {
+            display: none;
+            grid-column: span 12;
+            padding: 10px 16px;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, transparent 100%);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--accent-blue);
+            letter-spacing: 1.5px;
+            margin-top: 8px;
+        }
+        body.war-room-mode .war-room-section-banner { display: flex; align-items: center; justify-content: space-between; }
+

@@ -1,0 +1,50 @@
+/* css/base.css — 變數（色票、台股紅漲綠跌）、重設、基本版面、平行沙盤模式。
+   四個 CSS 檔要照 index.html 裡的順序載入（後面的規則可以蓋掉前面的）。 */
+        :root {
+            --bg-body: #0a0f1d;          
+            --card-bg: rgba(30, 41, 59, 0.65); 
+            --card-shadow: rgba(0, 0, 0, 0.4);
+            --text-main: #f8fafc;        
+            --text-sub: #94a3b8;         
+            --border-color: rgba(51, 65, 85, 0.6); 
+            --input-bg: rgba(15, 23, 42, 0.8);         
+            --accent-blue: #38bdf8;      
+            --accent-green: #34d399;     
+            --accent-orange: #fbbf24;    
+            --accent-red: #f87171;       
+            --accent-purple: #c084fc;    
+            --accent-pink: #ec4899;      
+            --accent-cyan: #22d3ee;
+            --status-safe: #22d3ee;
+            --status-watch: #fbbf24;
+            --status-alert: #e879f9;
+            --status-info: #38bdf8;
+            --status-neutral: #94a3b8;
+            /* 台股慣例：紅漲綠跌。與風險狀態色刻意分開，避免同一個顏色代表兩種意思 */
+            --market-up: #f87171;
+            --market-down: #34d399;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { 
+            background-color: var(--bg-body); 
+            color: var(--text-main); padding-bottom: 90px; overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; transition: 0.3s; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+
+        .app-container { max-width: 520px; margin: 0 auto; display: block; transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* 平行沙盤模式 */
+        body.sandbox-mode { --border-color: rgba(192, 132, 252, 0.5); --card-shadow: rgba(192, 132, 252, 0.2); background-color: #1a1025; }
+        body.sandbox-mode .card { border: 1px dashed var(--accent-purple); box-shadow: 0 0 20px rgba(192, 132, 252, 0.15); }
+        .sandbox-banner { display: none; position: sticky; top: 0; z-index: 999; background: linear-gradient(90deg, rgba(147, 51, 234, 0.95), rgba(192, 132, 252, 0.95)); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #fff; padding: 12px 15px; justify-content: space-between; align-items: center; font-weight: 800; border-bottom: 2px solid #e9d5ff; font-size: 14px; box-shadow: 0 4px 15px rgba(147, 51, 234, 0.5); animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        .sandbox-btn { background: #fff; color: var(--accent-purple); border: none; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; margin-left: 8px; font-size:13px; transition:0.2s; }
+        .sandbox-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .sandbox-btn-discard { background: rgba(0,0,0,0.2); border: 1px solid #fff; color: #fff; }
+
