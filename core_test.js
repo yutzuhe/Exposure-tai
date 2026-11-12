@@ -34,7 +34,7 @@ vm.runInContext(block, ctx);
 const C = ctx;
 ['calculatePMT', 'marginLevelOf', 'marginLabelOf', 'stressedValue', 'stressPortfolio', 'dropToMarginLine', 'computePortfolio', 'computeStress', 'nwGlideTarget', 'dampenAmountOf', 'effectiveTargetOf',
  'vixBandOf', 'computeDynamicBuffer', 'computeDrawdown', 'computeFireTime', 'computeFleet', 'nextMilestoneOf', 'computeQuests', 'computeExposureStatus', 'computeGaugeModel', 'computeRebalance',
- 'groupHoldings', 'parseKellyInputs', 'parseMcInputs', 'computeKelly', 'randnBm', 'simulateMonteCarlo'].forEach(n => t('有定義：' + n, typeof C[n] === 'function'));
+ 'groupHoldings', 'parseKellyInputs', 'parseMcInputs', 'computeKelly', 'randnBm', 'simulateMonteCarlo', 'daysInMonth', 'parseYmd', 'countPaidByDate', 'creditLoanStatus'].forEach(n => t('有定義：' + n, typeof C[n] === 'function'));
 
 // ---- 1. 貸款月付額 ----
 t('PMT：100 萬、3%、10 年 ≈ 9,656.07', near(C.calculatePMT(1000000, 3, 10), 9656.0744698, 1e-4), C.calculatePMT(1000000, 3, 10));
@@ -330,6 +330,70 @@ t('蒙地卡羅：機率 = 次數 × 100 ÷ 總次數，1,000 次時與「次數
   t('蒙地卡羅：中位數 ≈ W0·e^(μ−σ²/2)T', Math.abs(med / medExpect - 1) < 0.01, [med, medExpect]);
 })();
 t('蒙地卡羅：不改動傳入的參數', (() => { const p = Object.assign({}, MCB); const s = JSON.stringify(p); C.simulateMonteCarlo(p, () => 0.5); return JSON.stringify(p) === s; })());
+
+
+// ---- 18. 信貸還款進度（已還幾期 → 剩餘本金、月付額）----
+t('每月天數：大小月、平年閏年（1900 平年、2000 閏年、2024 閏年）', C.daysInMonth(2025, 2) === 28 && C.daysInMonth(2024, 2) === 29 && C.daysInMonth(1900, 2) === 28 && C.daysInMonth(2000, 2) === 29 && C.daysInMonth(2026, 4) === 30 && C.daysInMonth(2026, 1) === 31 && C.daysInMonth(2026, 12) === 31);
+t('每月天數：十二個月逐月核對（平年 31/28/31/30/31/30/31/31/30/31/30/31）', [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31].every((n, k) => C.daysInMonth(2026, k + 1) === n));
+t('日期解析：30 天的月份沒有 31 號、31 天的月份有（4／6／9／11 月 31 日不存在）', [4, 6, 9, 11].every(m => C.parseYmd('2026-' + String(m).padStart(2, '0') + '-31') === null) && [1, 3, 5, 7, 8, 10, 12].every(m => C.parseYmd('2026-' + String(m).padStart(2, '0') + '-31') !== null));
+t('信貸總期數：年數 × 12 四捨五入（2.5 年 = 30 期、0.55 年 = 6.6 → 7 期）', C.creditLoanStatus({ principal: 1000, rate: 3, term: 2.5 }, 'x').total === 30 && C.creditLoanStatus({ principal: 1000, rate: 3, term: 0.55 }, 'x').total === 7);
+t('日期解析：合法的 YYYY-MM-DD', (d => d.y === 2026 && d.m === 11 && d.d === 9)(C.parseYmd('2026-11-09')) && C.parseYmd(' 2024-02-29 ') !== null);
+t('日期解析：不存在的日子、格式錯誤、空值都回 null', ['2026-02-30', '2025-02-29', '2026-13-01', '2026-00-10', '2026-11-00', '2026-1-5', '26-11-09', 'abc', '', undefined, null, '2026/11/09'].every(v => C.parseYmd(v) === null));
+t('依日期算已還期數：1/31 起、11/10 → 1/31、2/28、…、10/31 共 10 期（沒有 31 號的月份算月底）', C.countPaidByDate('2026-01-31', '2026-11-10', 84) === 10);
+t('依日期算已還期數：繳款日當天算已繳、前一天不算', C.countPaidByDate('2026-11-10', '2026-11-10', 84) === 1 && C.countPaidByDate('2026-11-11', '2026-11-10', 84) === 0);
+t('依日期算已還期數：閏年 2/29 當天才算第 2 期（1/31 起）', C.countPaidByDate('2024-01-31', '2024-02-29', 60) === 2 && C.countPaidByDate('2024-01-31', '2024-02-28', 60) === 1);
+t('依日期算已還期數：跨年（2025-11-15 起：2026-02-14 → 3 期、2026-02-15 → 4 期）', C.countPaidByDate('2025-11-15', '2026-02-14', 60) === 3 && C.countPaidByDate('2025-11-15', '2026-02-15', 60) === 4);
+t('依日期算已還期數：最多到總期數；日期錯誤或期數 0 → 0', C.countPaidByDate('2020-01-05', '2026-11-10', 12) === 12 && C.countPaidByDate('abc', '2026-11-10', 12) === 0 && C.countPaidByDate('2026-01-05', '', 12) === 0 && C.countPaidByDate('2026-01-05', '2026-11-10', 0) === 0);
+
+const LOAN = { principal: 1000000, rate: 3, term: 7 };
+let L0 = C.creditLoanStatus(LOAN, '2026-11-10');
+t('信貸（舊資料、沒填進度）：本金當成現在還欠的、月付額照原算法、沒有已還期數', L0.balance === 1000000 && L0.pmt === C.calculatePMT(1000000, 3, 7) && L0.paid === 0 && L0.total === 84 && L0.remaining === 84 && L0.tracked === false && L0.done === false);
+let L24 = C.creditLoanStatus(Object.assign({ paid: 24 }, LOAN), '2026-11-10');
+(function() {   // 獨立的逐月模擬：每月本金 × (1 + 月利率) − 月付額
+  const i = 0.03 / 12, pmt = C.calculatePMT(1000000, 3, 7); let bal = 1000000;
+  for (let k = 0; k < 24; k++) bal = bal * (1 + i) - pmt;
+  t('信貸已還 24 期：剩餘本金 = 逐月模擬（約 735,351）', near(L24.balance, bal, 1e-6) && Math.round(L24.balance) === 735351, [L24.balance, bal]);
+  t('信貸已還 24 期：月付額不變、剩 60 期、有填進度', L24.pmt === L0.pmt && L24.remaining === 60 && L24.paid === 24 && L24.tracked === true && L24.done === false);
+  const L83 = C.creditLoanStatus(Object.assign({ paid: 83 }, LOAN), 'x');
+  t('信貸只剩最後 1 期：剩餘本金 = 月付額 ÷ (1 + 月利率)（最後一期的現值）', near(L83.balance, pmt / (1 + i), 1e-6), [L83.balance, pmt / (1 + i)]);
+  let b = 1000000; const seq = []; for (let k = 1; k <= 84; k++) { b = b * (1 + i) - pmt; seq.push(b); }
+  t('信貸 84 期逐月模擬：期末餘額 ≈ 0（月付額與剩餘本金公式一致）', Math.abs(seq[83]) < 1e-6 && seq.slice(0, 83).every((v, idx) => v > 0 && (idx === 0 || v < seq[idx - 1])));
+  t('信貸：每一期的剩餘本金都和逐月模擬相同（1～83 期）', (() => { for (let k = 1; k <= 83; k++) { const x = C.creditLoanStatus(Object.assign({ paid: k }, LOAN), 'x').balance; if (!near(x, seq[k - 1], 1e-5)) return false; } return true; })());
+})();
+let LD = C.creditLoanStatus(Object.assign({ paid: 84 }, LOAN), 'x');
+t('信貸全部還完：剩餘 0、月付 0、done', LD.balance === 0 && LD.pmt === 0 && LD.done === true && LD.remaining === 0);
+t('信貸已還期數超過總期數 → 當作還完（不會變負）', (l => l.balance === 0 && l.paid === 84 && l.done)(C.creditLoanStatus(Object.assign({ paid: 200 }, LOAN), 'x')));
+t('信貸 0% 利率：本金 84 萬、7 年、已還 24 期 → 剩 60 萬（按期數平均）', (l => l.pmt === 10000 && l.balance === 600000)(C.creditLoanStatus({ principal: 840000, rate: 0, term: 7, paid: 24 }, 'x')));
+t('已還期數的輸入：小數無條件捨去、負數與文字當 0、字串數字可用', C.creditLoanStatus(Object.assign({ paid: 24.9 }, LOAN), 'x').paid === 24 && C.creditLoanStatus(Object.assign({ paid: -5 }, LOAN), 'x').paid === 0 && C.creditLoanStatus(Object.assign({ paid: 'abc' }, LOAN), 'x').paid === 0 && C.creditLoanStatus(Object.assign({ paid: '24' }, LOAN), 'x').paid === 24);
+let LA = C.creditLoanStatus(Object.assign({ progress: 'auto', firstPay: '2026-01-31' }, LOAN), '2026-11-10');
+t('依繳款日自動計算：1/31 起、今天 11/10 → 已還 10 期，與手動填 10 期的結果完全相同', LA.paid === 10 && LA.balance === C.creditLoanStatus(Object.assign({ paid: 10 }, LOAN), 'x').balance && LA.tracked === true);
+t('依繳款日自動計算：隨日期往後，已還期數與剩餘本金跟著變（剩餘本金遞減）', (() => { let prev = Infinity; for (const d of ['2026-01-30', '2026-01-31', '2026-02-28', '2026-06-30', '2027-01-31']) { const x = C.creditLoanStatus(Object.assign({ progress: 'auto', firstPay: '2026-01-31' }, LOAN), d); if (!(x.balance <= prev)) return false; prev = x.balance; } return true; })());
+t('依繳款日自動計算：第一期還沒到 → 已還 0、剩餘本金 = 貸款金額（但算有填進度）', (l => l.paid === 0 && l.balance === 1000000 && l.tracked === true)(C.creditLoanStatus(Object.assign({ progress: 'auto', firstPay: '2026-12-01' }, LOAN), '2026-11-10')));
+t('依繳款日自動計算：沒填日期／日期錯誤 → 已還 0；「自動」模式不看手動期數', (l => l.paid === 0 && l.balance === 1000000)(C.creditLoanStatus(Object.assign({ progress: 'auto', paid: 30 }, LOAN), '2026-11-10')) && C.creditLoanStatus(Object.assign({ progress: 'auto', firstPay: 'abc', paid: 30 }, LOAN), '2026-11-10').paid === 0);
+t('手動模式不看繳款日', C.creditLoanStatus(Object.assign({ progress: 'manual', paid: 5, firstPay: '2020-01-01' }, LOAN), '2026-11-10').paid === 5 && C.creditLoanStatus(Object.assign({ paid: 5, firstPay: '2020-01-01' }, LOAN), '2026-11-10').paid === 5);
+t('期數沒填（0 年）：沒辦法算進度，已還期數忽略、不產生 NaN 的剩餘本金', (l => l.total === 0 && l.paid === 0 && l.balance === 1000000)(C.creditLoanStatus({ principal: 1000000, rate: 3, term: 0, paid: 12 }, 'x')));
+t('本金 0 的信貸：不算還清、全是 0', (l => l.balance === 0 && l.pmt === 0 && l.done === false)(C.creditLoanStatus({ principal: 0, rate: 3, term: 7, paid: 84 }, 'x')));
+t('不改動傳入的資料', (() => { const d = Object.assign({ paid: 24, progress: 'auto', firstPay: '2026-01-31' }, LOAN), sn = JSON.stringify(d); C.creditLoanStatus(d, '2026-11-10'); return JSON.stringify(d) === sn; })());
+
+(function() {   // 接進總覽加總：質押 200 萬 + 信貸 100 萬（已還 24 期）
+  const base = { accounts: [{ balance: 500000 }], stocks: [], funds: [], usdRate: 1, livingExpense: 0, today: '2026-11-10' };
+  const dPledge = { type: 'pledge', principal: 2000000, rate: 2.4 };
+  const noProg = C.computePortfolio(Object.assign({}, base, { debts: [dPledge, Object.assign({ type: 'credit' }, LOAN)] }));
+  const paid24 = C.computePortfolio(Object.assign({}, base, { debts: [dPledge, Object.assign({ type: 'credit', paid: 24 }, LOAN)] }));
+  t('總覽：沒填進度 → 信貸 100 萬、月付額照舊（和改版前一樣）', noProg.credit === 1000000 && near(noProg.monthlyCreditPMT, C.calculatePMT(1000000, 3, 7)) && noProg.totalDebt === 3000000);
+  t('總覽：已還 24 期 → 信貸改成剩餘本金，總負債與淨資產同步更新', near(paid24.credit, L24.balance, 1e-6) && near(paid24.totalDebt, 2000000 + L24.balance, 1e-6) && near(paid24.netWorth, 500000 - 2000000 - L24.balance, 1e-6) && near(paid24.netWorth - noProg.netWorth, 1000000 - L24.balance, 1e-6));
+  t('總覽：已還 24 期 → 月付額不變，每月流出沒變', near(paid24.monthlyCreditPMT, noProg.monthlyCreditPMT, 1e-9) && near(paid24.monthlyOutflow, noProg.monthlyOutflow, 1e-9));
+  t('總覽：平均利率改用剩餘本金加權', near(paid24.avgRate, (2000000 * 2.4 + L24.balance * 3) / (2000000 + L24.balance), 1e-9));
+  const auto = C.computePortfolio(Object.assign({}, base, { debts: [Object.assign({ type: 'credit', progress: 'auto', firstPay: '2026-01-31' }, LOAN)] }));
+  t('總覽：依繳款日自動計算（今天由外部傳入）→ 已還 10 期的剩餘本金', near(auto.credit, C.creditLoanStatus(Object.assign({ paid: 10 }, LOAN), 'x').balance, 1e-6));
+  const noToday = C.computePortfolio(Object.assign({}, base, { today: undefined, debts: [Object.assign({ type: 'credit', progress: 'auto', firstPay: '2026-01-31' }, LOAN)] }));
+  t('總覽：沒傳今天的日期 → 自動模式當作還沒開始還（不丟錯）', noToday.credit === 1000000);
+  const done = C.computePortfolio(Object.assign({}, base, { debts: [dPledge, Object.assign({ type: 'credit', paid: 84 }, LOAN)] }));
+  t('總覽：信貸還完 → 不再計入負債與每月流出', done.credit === 0 && done.monthlyCreditPMT === 0 && done.totalDebt === 2000000 && near(done.monthlyOutflow, 4000, 1e-9));
+  const mixed = C.computePortfolio(Object.assign({}, base, { debts: [Object.assign({ type: 'credit', paid: 24 }, LOAN), Object.assign({ type: 'credit' }, { principal: 300000, rate: 5, term: 3 })] }));
+  t('總覽：多筆信貸各算各的（一筆有進度、一筆沒有）', near(mixed.credit, L24.balance + 300000, 1e-6) && near(mixed.monthlyCreditPMT, L24.pmt + C.calculatePMT(300000, 5, 3), 1e-9));
+  t('質押不受影響：質押沒有還款進度的概念', (p => p.pledge === 2000000 && near(p.monthlyPledgeInterest, 4000, 1e-9))(C.computePortfolio(Object.assign({}, base, { debts: [Object.assign({ type: 'pledge', principal: 2000000, rate: 2.4, paid: 30, progress: 'auto', firstPay: '2020-01-01' })] }))));
+})();
 
 console.log(`core_test: ${pass} 通過, ${fail} 失敗`);
 process.exit(fail ? 1 : 0);

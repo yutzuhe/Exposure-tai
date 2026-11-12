@@ -8,6 +8,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="曝險雷達">
     <title>曝險雷達 V17.6 · 清晰檢視</title>
+    <!-- 主題要在畫面出現前套用（避免閃一下），所以放在最前面 -->
+    <script src="js/theme.js"></script>
     <!-- 外部 CDN 載入 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
@@ -19,6 +21,7 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/widgets.css">
+    <link rel="stylesheet" href="css/print.css">
 </head>
 <body class="simple-view">
 
@@ -38,8 +41,9 @@
         <div class="header-actions">
             <button id="btn-pwa-install" class="shield-toggle-btn" style="color:var(--accent-green); border-color:var(--accent-green); display:none;" onclick="installPWA()"><i class="fa-solid fa-mobile-screen-button"></i> 安裝 App</button>
             <button id="btn-sandbox" class="shield-toggle-btn" title="試算模式：可以隨意改數字，不會動到真實資料" style="color:var(--accent-purple); border-color:var(--accent-purple);" onclick="toggleSandbox()"><i class="fa-solid fa-flask"></i> 平行沙盤</button>
-            <button id="btn-war-room" class="shield-toggle-btn advanced-only" title="大螢幕多欄並排檢視" style="color:#38bdf8; border-color:#38bdf8;" onclick="toggleWarRoom()"><i class="fa-solid fa-table-columns"></i> 12欄戰情室</button>
+            <button id="btn-war-room" class="shield-toggle-btn advanced-only" title="大螢幕多欄並排檢視" style="color:var(--accent-blue); border-color:var(--accent-blue);" onclick="toggleWarRoom()"><i class="fa-solid fa-table-columns"></i> 12欄戰情室</button>
             <button id="btn-blind-shield" class="shield-toggle-btn" title="把金額模糊起來，適合在外面或截圖時使用" onclick="toggleBlindMode()"><i class="fa-solid fa-eye-slash"></i> 盲視</button>
+            <button id="btn-theme" class="shield-toggle-btn" title="切換成淺色背景" aria-label="切換成淺色背景" onclick="toggleTheme()"><i class="fa-solid fa-sun"></i> <span id="theme-btn-label">淺色</span></button>
         </div>
     </div>
 
@@ -85,7 +89,7 @@
 
     <!-- 頂部風險與配置摘要 -->
     <div style="padding: 0 15px;">
-        <div class="card glow-card scanlines" style="margin-bottom: 12px; border-bottom: 4px solid var(--accent-blue); background: linear-gradient(180deg, var(--card-bg) 0%, rgba(15,23,42,0.85) 100%); position: relative;">
+        <div class="card glow-card scanlines" style="margin-bottom: 12px; border-bottom: 4px solid var(--accent-blue); background: linear-gradient(180deg, var(--card-bg) 0%, rgba(var(--surface-rgb), 0.85) 100%); position: relative;">
             
             <div class="hero-bento-grid">
                 <div>
@@ -121,12 +125,12 @@
 
                 <div id="fleet-container" class="fleet-box" style="position:relative; z-index: 10;">
                     <div style="font-size: 13px; color: var(--text-sub); font-weight: 800; margin-bottom: 10px; letter-spacing: 1px;"><i class="fa-solid fa-trophy" style="color:var(--accent-orange); margin-right:4px;"></i> 星際艦隊階級</div>
-                    <div id="fleet-icon" style="font-size: 52px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); animation: float 3s ease-in-out infinite; margin-bottom: 4px;">🛶</div>
-                    <div id="fleet-name" style="font-size: 24px; font-weight: 900; color: #94a3b8; margin-bottom: 14px; letter-spacing: 1px;">沿岸木筏</div>
-                    <div id="fleet-progress-bg" class="progress-bar-bg" style="height: 10px; background: rgba(255,255,255,0.05); border: none; margin: 0 auto; width: 90%;">
-                        <div id="fleet-progress" class="progress-bar-fill" style="background: #94a3b8; width: 0%;"></div>
+                    <div id="fleet-icon" style="font-size: 52px; filter: drop-shadow(0 0 10px rgba(var(--ov), 0.3)); animation: float 3s ease-in-out infinite; margin-bottom: 4px;">🛶</div>
+                    <div id="fleet-name" style="font-size: 24px; font-weight: 900; color: var(--text-sub); margin-bottom: 14px; letter-spacing: 1px;">沿岸木筏</div>
+                    <div id="fleet-progress-bg" class="progress-bar-bg" style="height: 10px; background: rgba(var(--ov), 0.05); border: none; margin: 0 auto; width: 90%;">
+                        <div id="fleet-progress" class="progress-bar-fill" style="background: var(--text-sub); width: 0%;"></div>
                     </div>
-                    <div id="fleet-next-req" style="font-size: 12px; color: var(--text-sub); margin-top: 10px; font-weight: 600;">距離升級 [<span id="fleet-next-name" style="color:#34d399;">武裝快艇</span>] 尚需: $<span id="ui-fleet-shortfall" data-val="0">...</span></div>
+                    <div id="fleet-next-req" style="font-size: 12px; color: var(--text-sub); margin-top: 10px; font-weight: 600;">距離升級 [<span id="fleet-next-name" style="color:var(--accent-green);">武裝快艇</span>] 尚需: $<span id="ui-fleet-shortfall" data-val="0">...</span></div>
                 </div>
 
                 <div class="summary-table" style="position:relative; z-index: 10;">
@@ -149,6 +153,7 @@
             <p class="na-detail" id="ui-na-detail">輸入帳戶、持股與借款後，這裡會告訴你下一步該做什麼。</p>
             <ul class="na-lines blur-target" id="ui-na-lines"></ul>
             <div class="na-funds blur-target" id="ui-na-funds" hidden></div>
+            <div class="na-cash blur-target" id="ui-na-cash" hidden></div>
             <details class="na-others" id="ui-na-others" hidden>
                 <summary id="ui-na-others-summary">其他提醒</summary>
                 <ul class="blur-target" id="ui-na-others-list"></ul>
@@ -161,7 +166,7 @@
             <button type="button" class="nav-tab active" aria-current="page" onclick="showTab('tab-notes')"><i class="fa-solid fa-book-open" aria-hidden="true"></i>學習筆記</button>
             <button type="button" class="nav-tab" title="雷達陣列" onclick="showTab('tab-overview')"><i class="fa-solid fa-satellite-dish" aria-hidden="true"></i>持倉總覽</button>
             <button type="button" class="nav-tab" title="資金核心" onclick="showTab('tab-details')"><i class="fa-solid fa-building-columns" aria-hidden="true"></i>資產負債</button>
-            <button type="button" class="nav-tab" onclick="showTab('tab-cashflow')"><i class="fa-solid fa-money-bill-transfer" aria-hidden="true"></i>現金流量</button>
+            <button type="button" class="nav-tab" data-cf-nav onclick="showTab('tab-cashflow')"><i class="fa-solid fa-money-bill-transfer" aria-hidden="true"></i>現金流量</button>
             <button type="button" class="nav-tab advanced-nav" title="戰術中樞" onclick="showTab('tab-tactics')"><i class="fa-solid fa-crosshairs" aria-hidden="true"></i>策略工具</button>
             <button type="button" class="nav-tab advanced-nav" title="風險情境" onclick="showTab('tab-risk')"><i class="fa-solid fa-shield-virus" aria-hidden="true"></i>壓力測試</button>
             <button type="button" class="nav-tab" title="雲端與PWA" onclick="showTab('tab-settings')"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>備份與成長</button>
@@ -194,7 +199,7 @@
 
         <!-- 雷達陣列 (V17.3 圓餅圖旁全面改為「逐項百分比與進度條明細」) -->
         <div id="tab-overview" class="tab-content">
-            <div class="card blur-target vs-card-hover bento-span-12" style="padding: 16px 22px; background: rgba(255,255,255,0.03);" title="滑鼠懸停顯示實際金額">
+            <div class="card blur-target vs-card-hover bento-span-12" style="padding: 16px 22px; background: rgba(var(--ov), 0.03);" title="滑鼠懸停顯示實際金額">
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700;">
                     <span style="color:var(--accent-green);">
                         <i class="fa-solid fa-shield-halved" style="margin-right:4px;"></i>防禦裝甲 (現金) 
@@ -280,7 +285,7 @@
                     <button class="btn-add" onclick="addAccountItem()">＋ 新增活存</button>
                 </div>
                 <div id="accounts-container"></div>
-                <div style="margin-top:15px; display:flex; justify-content:space-between; font-size:12px; color:var(--text-sub); font-weight:600; background:rgba(255,255,255,0.03); padding:10px; border-radius:8px;">
+                <div style="margin-top:15px; display:flex; justify-content:space-between; font-size:12px; color:var(--text-sub); font-weight:600; background:rgba(var(--ov), 0.03); padding:10px; border-radius:8px;">
                     <span>美金匯率：<b style="color:var(--accent-blue);" id="ui-usd-rate">32.50</b></span>
                     <span style="font-size:14px; font-weight:700; color:var(--accent-green);">活存總計：$<span id="ui-total-cash-sum" data-val="0">0</span></span>
                 </div>
@@ -293,7 +298,7 @@
                 </div>
                 <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">各筆引擎獨立精算利率與攤還期數，作為安全流動比之分母依據。</div>
                 <div id="debts-container"></div>
-                <div style="margin-top:15px; text-align:right; font-size:14px; font-weight:700; color:var(--accent-red); background:rgba(248,113,113,0.05); padding:10px; border-radius:8px; border: 1px dashed rgba(248,113,113,0.2);">
+                <div style="margin-top:15px; text-align:right; font-size:14px; font-weight:700; color:var(--accent-red); background:rgba(var(--accent-red-rgb), 0.05); padding:10px; border-radius:8px; border: 1px dashed rgba(var(--accent-red-rgb), 0.2);">
                     負債引擎總額：$<span id="ui-total-debt-sum" data-val="0">0</span>
                 </div>
             </div>
@@ -301,7 +306,7 @@
 
         <!-- 現金流量 -->
         <div id="tab-cashflow" class="tab-content">
-            <div class="card blur-target bento-span-4" style="border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05);">
+            <div class="card blur-target bento-span-4" style="border: 1px solid rgba(var(--accent-blue-rgb), 0.3); background: rgba(var(--accent-blue-rgb), 0.05);">
                 <div class="section-header" style="margin-bottom: 10px;">
                     <div class="section-title" style="color: var(--accent-blue);">🏦 總資產與總負債池</div>
                 </div>
@@ -315,13 +320,39 @@
                         <div class="summary-cell val" id="ui-cashflow-pledge" data-val="0">$0</div>
                     </div>
                     <div class="summary-row">
-                        <div class="summary-cell label">銀行信貸總本金</div>
+                        <div class="summary-cell label">銀行信貸剩餘本金</div>
                         <div class="summary-cell val" id="ui-cashflow-credit" data-val="0">$0</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card blur-target bento-span-4" style="border: 1px solid rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.05);">
+            <!-- 未來現金流：把借款扣款日、預計股利、每月收支依日期排出來，提前看到哪天現金會不夠 -->
+            <div class="card cf-card blur-target bento-span-4" id="cf-card">
+                <div class="section-header" style="margin-bottom: 10px;">
+                    <div class="section-title" style="color: var(--accent-blue);"><span>📅 未來現金流時間表<small class="alias">提前看到哪天現金會緊</small></span></div>
+                </div>
+                <div class="cf-toolbar">
+                    <div class="display-mode-switch" id="cf-range" role="group" aria-label="預報天數">
+                        <button type="button" data-days="30" aria-pressed="false" onclick="setCashflowRange(30)">30 天</button>
+                        <button type="button" data-days="60" aria-pressed="true" onclick="setCashflowRange(60)">60 天</button>
+                        <button type="button" data-days="90" aria-pressed="false" onclick="setCashflowRange(90)">90 天</button>
+                    </div>
+                </div>
+                <div class="cf-alert" id="cf-alert" role="status" data-level="info" hidden></div>
+                <div class="cf-stats" id="cf-stats"></div>
+                <div class="cf-list" id="cf-list"></div>
+                <details class="cf-settings">
+                    <summary>預報設定（選填）</summary>
+                    <div class="cf-set-grid">
+                        <label class="cost-field"><span>沒填扣款日的項目，每月幾日扣款</span><input type="number" class="inv-input-num" id="input-cf-default-day" min="1" max="31" step="1" inputmode="numeric" placeholder="1" aria-label="預設每月扣款日" oninput="updateCashflowSetting('cfDefaultDay', this.value)"></label>
+                        <label class="cost-field"><span>每月固定收入（薪資等）</span><input type="number" class="inv-input-num blur-target" id="input-cf-income" min="0" step="any" inputmode="decimal" placeholder="選填" aria-label="每月固定收入" oninput="updateCashflowSetting('monthlyIncome', this.value)"></label>
+                        <label class="cost-field"><span>收入每月幾日入帳</span><input type="number" class="inv-input-num" id="input-cf-income-day" min="1" max="31" step="1" inputmode="numeric" placeholder="5" aria-label="收入入帳日" oninput="updateCashflowSetting('incomeDay', this.value)"></label>
+                    </div>
+                </details>
+                <p class="cf-note" id="cf-note"></p>
+            </div>
+
+            <div class="card blur-target bento-span-4" style="border: 1px solid rgba(var(--accent-green-rgb), 0.3); background: rgba(var(--accent-green-rgb), 0.05);">
                 <div class="section-header" style="margin-bottom: 10px;">
                     <div class="section-title" style="color: var(--accent-green);"><span>💸 每月預估支出 (流出)<small class="alias">引擎燃料費</small></span></div>
                 </div>
@@ -351,7 +382,7 @@
                 </div>
             </div>
 
-            <div class="card blur-target bento-span-4" style="border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05);">
+            <div class="card blur-target bento-span-4" style="border: 1px solid rgba(var(--accent-blue-rgb), 0.3); background: rgba(var(--accent-blue-rgb), 0.05);">
                 <div class="section-header" style="margin-bottom: 10px;">
                     <div class="section-title" style="color: var(--accent-blue);"><span>💧 現金水位建議<small class="alias">活水智慧調節閥</small></span></div>
                 </div>
@@ -365,7 +396,7 @@
                         <div class="summary-cell label">系統判定安全底線</div>
                         <div class="summary-cell val" id="ui-dyn-safe-line" data-val="0" style="color:var(--accent-orange);">$0</div>
                     </div>
-                    <div style="background: rgba(0,0,0,0.3); border: 1px dashed var(--border-color); border-radius: 12px; padding: 14px; margin-top: 12px; text-align: center;" id="ui-dyn-advice-box"></div>
+                    <div style="background: rgba(var(--well-rgb), calc(0.3 * var(--well-k))); border: 1px dashed var(--border-color); border-radius: 12px; padding: 14px; margin-top: 12px; text-align: center;" id="ui-dyn-advice-box"></div>
                 </div>
             </div>
         </div>
@@ -379,13 +410,13 @@
         <!-- 戰術中樞 -->
         <div id="tab-tactics" class="tab-content advanced-nav">
             <div id="tactics-pinned-area" style="min-height: 5px;"></div>
-            <div id="tactics-divider" style="text-align:center; color:var(--text-sub); font-size:11px; margin: 15px 0 25px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); line-height: 0.1em; display:none;">
+            <div id="tactics-divider" style="text-align:center; color:var(--text-sub); font-size:11px; margin: 15px 0 25px 0; border-bottom: 1px dashed rgba(var(--ov), 0.1); line-height: 0.1em; display:none;">
                 <span style="background:var(--bg-body); padding:0 10px; font-weight:600;"><i class="fa-solid fa-sort"></i> 以下為未釘選模組 (可自由拖曳排序)</span>
             </div>
             <div id="tactics-unpinned-area" style="min-height: 100px;">
                 
                 <!-- ⚖️ 資產配比再平衡 -->
-                <div class="card bento-span-4" id="widget-rebalance" style="border: 1px solid rgba(34, 211, 238, 0.3); background: rgba(34, 211, 238, 0.05);">
+                <div class="card bento-span-4" id="widget-rebalance" style="border: 1px solid rgba(var(--accent-cyan-rgb), 0.3); background: rgba(var(--accent-cyan-rgb), 0.05);">
                     <div class="section-header" style="margin-bottom: 10px;">
                         <div class="section-title" style="color: var(--accent-cyan);">⚖️ 現金與投資再平衡</div>
                         <div class="widget-controls">
@@ -404,7 +435,7 @@
                 </div>
 
                 <!-- 🎯 DCA 狙擊 -->
-                <div class="card bento-span-4" id="widget-dca" style="border: 1px solid rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.05);">
+                <div class="card bento-span-4" id="widget-dca" style="border: 1px solid rgba(var(--accent-green-rgb), 0.3); background: rgba(var(--accent-green-rgb), 0.05);">
                     <div class="section-header" style="margin-bottom: 10px;">
                         <div class="section-title" style="color: var(--accent-green);"><span>🎯 本月新增資金怎麼分<small class="alias">發薪日狙擊部署</small></span></div>
                         <div class="widget-controls">
@@ -414,13 +445,13 @@
                     </div>
                     <div class="form-row">
                         <div class="form-label" style="color:var(--text-main);">本月新增可用資金 ($)</div>
-                        <input type="number" class="form-input" id="input-sniper-funds" placeholder="例如: 30000" style="width: 130px; border-color: rgba(52, 211, 153, 0.5); color: var(--accent-green);" oninput="runSniperDCA()">
+                        <input type="number" class="form-input" id="input-sniper-funds" placeholder="例如: 30000" style="width: 130px; border-color: rgba(var(--accent-green-rgb), 0.5); color: var(--accent-green);" oninput="runSniperDCA()">
                     </div>
-                    <div id="sniper-result-container" style="display:none; margin-top:12px; border-top:1px dashed rgba(52, 211, 153, 0.3); padding-top:12px;"></div>
+                    <div id="sniper-result-container" style="display:none; margin-top:12px; border-top:1px dashed rgba(var(--accent-green-rgb), 0.3); padding-top:12px;"></div>
                 </div>
 
                 <!-- 🔥 VIX 雷達 -->
-                <div class="card bento-span-4" id="widget-vix" style="border: 1px solid rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.05);">
+                <div class="card bento-span-4" id="widget-vix" style="border: 1px solid rgba(var(--accent-orange-rgb), 0.4); background: rgba(var(--accent-orange-rgb), 0.05);">
                     <div class="section-header" style="margin-bottom: 10px;">
                         <div class="section-title" style="color: var(--accent-orange);"><span>🔥 VIX 恐慌指數<small class="alias">市場情緒雷達</small></span></div>
                         <div class="widget-controls">
@@ -436,7 +467,7 @@
                 </div>
 
                 <!-- 🌡️ 貪婪濾網 -->
-                <div class="card bento-span-4" id="widget-dampener" style="border: 1px solid rgba(248, 113, 113, 0.4); background: rgba(248, 113, 113, 0.05);">
+                <div class="card bento-span-4" id="widget-dampener" style="border: 1px solid rgba(var(--accent-red-rgb), 0.4); background: rgba(var(--accent-red-rgb), 0.05);">
                     <div class="section-header" style="margin-bottom: 10px;">
                         <div class="section-title" style="color: var(--accent-red);"><span>🌡️ 市場過熱時降低曝險<small class="alias">貪婪濾網與乖離減震器</small></span></div>
                         <div class="widget-controls">
@@ -448,10 +479,10 @@
                         <div style="font-size: 14px; font-weight: 700;">啟用動態減震系統</div>
                         <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
                             <input type="checkbox" id="input-auto-dampener" onchange="toggleDampener(this.checked)" style="opacity: 0; width: 0; height: 0;">
-                            <span class="slider-toggle" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); transition: .4s; border-radius: 24px;"></span>
+                            <span class="slider-toggle" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(var(--ov), 0.1); border:1px solid rgba(var(--ov), 0.2); transition: .4s; border-radius: 24px;"></span>
                         </label>
                     </div>
-                    <div id="dampener-settings" style="display:none; margin-top: 10px; border-top: 1px dashed rgba(248,113,113,0.3); padding-top: 12px;">
+                    <div id="dampener-settings" style="display:none; margin-top: 10px; border-top: 1px dashed rgba(var(--accent-red-rgb), 0.3); padding-top: 12px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="font-size: 13px; color: var(--text-sub);">大盤乖離率 (%)：</div>
                             <input type="number" class="form-input" id="input-bias-value" value="0.0" step="0.1" style="width: 85px; color: var(--accent-red);" oninput="updateBiasRatio(this.value)">
@@ -461,7 +492,7 @@
                 </div>
 
                 <!-- 🎯 凱利準則 -->
-                <div class="card bento-span-4" id="widget-kelly" style="border: 1px solid rgba(236, 72, 153, 0.3); background: rgba(236, 72, 153, 0.05);">
+                <div class="card bento-span-4" id="widget-kelly" style="border: 1px solid rgba(var(--accent-pink-rgb), 0.3); background: rgba(var(--accent-pink-rgb), 0.05);">
                     <div class="section-header" style="margin-bottom: 10px;">
                         <div class="section-title" style="color: var(--accent-pink);">🎯 凱利準則：最佳槓桿甜區</div>
                         <div class="widget-controls">
@@ -481,25 +512,25 @@
                         <div class="form-label">您的綜合借貸利率 (%)</div>
                         <input type="number" class="form-input" id="input-kelly-rate" value="2.5" step="0.01" style="width: 80px; color:var(--accent-orange);" readonly>
                     </div>
-                    <button class="btn-action" style="background-color: #ec4899; color: #fff;" onclick="runKellyScanner()"><i class="fa-solid fa-radar" style="margin-right:6px;"></i>掃描最佳甜區落點</button>
+                    <button class="btn-action" style="background-color: var(--accent-pink); color: #fff;" onclick="runKellyScanner()"><i class="fa-solid fa-radar" style="margin-right:6px;"></i>掃描最佳甜區落點</button>
                     <div id="kelly-result-container" style="display:none; margin-top:15px;">
                         <div style="display:flex; justify-content:space-between; gap:10px; margin-bottom: 12px;">
-                            <div style="flex:1; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 10px; border-radius: 8px; text-align: center;">
+                            <div style="flex:1; background: rgba(var(--accent-blue-rgb), 0.1); border: 1px solid rgba(var(--accent-blue-rgb), 0.3); padding: 10px; border-radius: 8px; text-align: center;">
                                 <div style="font-size: 11px; color: var(--accent-blue); font-weight: 700;">Full Kelly</div>
-                                <div id="ui-kelly-full" style="font-size: 20px; color: #fff; font-weight: 900; margin-top: 4px;">--%</div>
+                                <div id="ui-kelly-full" style="font-size: 20px; color: var(--text-strong); font-weight: 900; margin-top: 4px;">--%</div>
                             </div>
-                            <div style="flex:1; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); padding: 10px; border-radius: 8px; text-align: center;">
+                            <div style="flex:1; background: rgba(var(--accent-green-rgb), 0.1); border: 1px solid rgba(var(--accent-green-rgb), 0.3); padding: 10px; border-radius: 8px; text-align: center;">
                                 <div style="font-size: 11px; color: var(--accent-green); font-weight: 700;">Half Kelly</div>
-                                <div id="ui-kelly-half" style="font-size: 20px; color: #fff; font-weight: 900; margin-top: 4px;">--%</div>
+                                <div id="ui-kelly-half" style="font-size: 20px; color: var(--text-strong); font-weight: 900; margin-top: 4px;">--%</div>
                             </div>
                         </div>
-                        <div style="background: rgba(255,255,255,0.03); border: 1px dashed #ec4899; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 12px; font-size:12px;" id="ui-kelly-advice"></div>
+                        <div style="background: rgba(var(--ov), 0.03); border: 1px dashed var(--accent-pink); padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 12px; font-size:12px;" id="ui-kelly-advice"></div>
                         <div class="chart-box" style="height: 160px;"><canvas id="kellyChart"></canvas></div>
                     </div>
                 </div>
 
                 <!-- ⏳ 降落導航 -->
-                <div class="card bento-span-4" id="widget-glide" style="border: 1px solid rgba(192, 132, 252, 0.3); background: rgba(192, 132, 252, 0.05);">
+                <div class="card bento-span-4" id="widget-glide" style="border: 1px solid rgba(var(--accent-purple-rgb), 0.3); background: rgba(var(--accent-purple-rgb), 0.05);">
                     <div class="section-header" style="margin-bottom: 10px;">
                         <div class="section-title" style="color: var(--accent-purple);"><span>⏳ 隨年齡降低曝險<small class="alias">生命週期自動降落導航</small></span></div>
                         <div class="widget-controls">
@@ -550,10 +581,10 @@
                         <div style="font-size: 14px; font-weight: 700;">啟用自動降槓桿系統</div>
                         <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
                             <input type="checkbox" id="input-auto-glidepath" onchange="toggleGlidepath(this.checked)" style="opacity: 0; width: 0; height: 0;">
-                            <span class="slider-toggle" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); transition: .4s; border-radius: 24px;"></span>
+                            <span class="slider-toggle" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(var(--ov), 0.1); border:1px solid rgba(var(--ov), 0.2); transition: .4s; border-radius: 24px;"></span>
                         </label>
                     </div>
-                    <div id="glidepath-settings" style="display:none; margin-top: 10px; border-top: 1px dashed rgba(192,132,252,0.3); padding-top: 12px;">
+                    <div id="glidepath-settings" style="display:none; margin-top: 10px; border-top: 1px dashed rgba(var(--accent-purple-rgb), 0.3); padding-top: 12px;">
                         <div class="form-label" style="margin-bottom:6px;">導航依據</div>
                         <select class="form-input" id="input-glide-basis" style="width:100%; text-align:left; margin-bottom:8px;" onchange="setGlideBasis(this.value)" aria-label="自動降槓桿的導航依據">
                             <option value="networth">淨資產達標進度（原本的做法）</option>
@@ -561,7 +592,7 @@
                             <option value="both">兩者取較低（較保守）</option>
                         </select>
                         <div id="glide-basis-note"></div>
-                        <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:12px; margin-top:10px; text-align:center;">
+                        <div style="background:rgba(var(--well-rgb), calc(0.3 * var(--well-k))); border-radius:12px; padding:12px; margin-top:10px; text-align:center;">
                             <div style="font-size:12px; color:var(--text-sub);">導航計算目標曝險</div>
                             <div id="ui-glide-calculated" data-val="0" style="font-size:24px; font-weight:900; color:var(--accent-purple); margin-top:4px;">--%</div>
                         </div>
@@ -569,7 +600,7 @@
                 </div>
 
                 <!-- 🎯 手動覆寫 -->
-                <div class="card bento-span-6" id="widget-manual" style="border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05);">
+                <div class="card bento-span-6" id="widget-manual" style="border: 1px solid rgba(var(--accent-blue-rgb), 0.3); background: rgba(var(--accent-blue-rgb), 0.05);">
                     <div class="section-header" style="margin-bottom: 10px;">
                         <div class="section-title" style="color: var(--accent-blue);"><span>🎯 手動設定目標曝險<small class="alias">戰術曝險覆寫</small></span></div>
                         <div class="widget-controls">
@@ -598,7 +629,7 @@
 
         <!-- 黑天鵝壓力測試 (含質押維持率救援計算機) -->
         <div id="tab-risk" class="tab-content advanced-nav">
-            <div class="card bento-span-6" style="border: 1px solid rgba(232, 121, 249, 0.4); background: rgba(232, 121, 249, 0.05);">
+            <div class="card bento-span-6" style="border: 1px solid rgba(var(--status-alert-rgb), 0.4); background: rgba(var(--status-alert-rgb), 0.05);">
                 <div class="section-header" style="margin-bottom: 10px;">
                     <div class="section-title" style="color: var(--status-alert);">質押維持率與壓力情境</div>
                 </div>
@@ -618,7 +649,7 @@
                 </div>
                 <div class="risk-context">系統參考：安全線 166% · 追繳線 130%。請依實際券商規則確認。</div>
                 
-                <div style="height: 1px; background-color: rgba(232, 121, 249, 0.2); margin: 15px 0;"></div>
+                <div style="height: 1px; background-color: rgba(var(--status-alert-rgb), 0.2); margin: 15px 0;"></div>
                 
                 <div class="section-title" style="color: var(--text-main); margin-bottom:6px;">壓力情境試算</div>
                 <div class="risk-context" style="margin:0 0 10px;">此為簡化假設，不代表特定歷史事件的實際市場走勢。各部位損失 = 大盤跌幅 × 該部位槓桿倍數（最多跌到 0），災後淨資產、曝險與維持率共用同一算法；未計槓桿 ETF 的複利損耗與追蹤誤差。</div>
@@ -628,9 +659,9 @@
                 </div>
                 
                 <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center;">
-                    <button class="btn-add" style="background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.4); color:var(--accent-red);" onclick="setStress(20)">2022 升息 (-20%)</button>
-                    <button class="btn-add" style="background:rgba(248,113,113,0.15); border:1px solid rgba(248,113,113,0.6); color:var(--accent-red);" onclick="setStress(30)">2020 新冠 (-30%)</button>
-                    <button class="btn-add" style="background:rgba(248,113,113,0.25); border:1px solid rgba(248,113,113,0.8); color:var(--accent-red);" onclick="setStress(50)">2008 海嘯 (-50%)</button>
+                    <button class="btn-add" style="background:rgba(var(--accent-red-rgb), 0.1); border:1px solid rgba(var(--accent-red-rgb), 0.4); color:var(--accent-red);" onclick="setStress(20)">2022 升息 (-20%)</button>
+                    <button class="btn-add" style="background:rgba(var(--accent-red-rgb), 0.15); border:1px solid rgba(var(--accent-red-rgb), 0.6); color:var(--accent-red);" onclick="setStress(30)">2020 新冠 (-30%)</button>
+                    <button class="btn-add" style="background:rgba(var(--accent-red-rgb), 0.25); border:1px solid rgba(var(--accent-red-rgb), 0.8); color:var(--accent-red);" onclick="setStress(50)">2008 海嘯 (-50%)</button>
                 </div>
                 
                 <div class="stress-result">
@@ -647,7 +678,7 @@
                 </div>
 
                 <!-- 護盾充能救援面板 -->
-                <div id="ui-margin-rescue-box" style="margin-top: 12px; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.3); border: 1px dashed rgba(56, 189, 248, 0.4); font-size: 12px; line-height: 1.6;"></div>
+                <div id="ui-margin-rescue-box" style="margin-top: 12px; padding: 12px; border-radius: 10px; background: rgba(var(--well-rgb), calc(0.3 * var(--well-k))); border: 1px dashed rgba(var(--accent-blue-rgb), 0.4); font-size: 12px; line-height: 1.6;"></div>
             </div>
         </div>
 
@@ -660,7 +691,7 @@
         <!-- 雲端日誌、戰術成就、PWA 部署中樞與歷史快照 -->
         <div id="tab-settings" class="tab-content">
             <!-- PWA 離線封裝與部署中樞 -->
-            <div class="card bento-span-4" style="border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.05);">
+            <div class="card bento-span-4" style="border: 1px solid rgba(var(--accent-blue-rgb), 0.4); background: rgba(var(--accent-blue-rgb), 0.05);">
                 <div class="section-header">
                     <div class="section-title" style="color:var(--accent-blue);"><span>📱 安裝到桌面（離線可用）<small class="alias">PWA 封裝中樞</small></span></div>
                 </div>
@@ -670,7 +701,7 @@
                 <div id="ui-pwa-status" class="pwa-status" role="status" aria-live="polite">檢查中…</div>
             </div>
 
-            <div class="card bento-span-4" style="border: 1px solid rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.05);">
+            <div class="card bento-span-4" style="border: 1px solid rgba(var(--accent-green-rgb), 0.3); background: rgba(var(--accent-green-rgb), 0.05);">
                 <div class="section-header">
                     <div class="section-title" style="color:var(--accent-green);"><span>☁️ 雲端同步 (GAS)<small class="alias">跨星系雲端同步</small></span></div>
                 </div>
@@ -684,22 +715,34 @@
                 </div>
                 <div class="risk-context" style="margin:0 0 12px;">金鑰只存在這台裝置，不會放進備份檔，也不會上傳到雲端。<strong style="color:var(--status-watch);">沒填金鑰＝舊模式：任何知道網址的人都能讀寫你的備份。</strong>設定方式見 <code>gas/Code.gs</code> 開頭的部署說明。</div>
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-action" id="btn-sync-up" style="margin-top:0; background-color:var(--accent-green); color:#0f172a;" onclick="syncToCloud()"><i class="fa-solid fa-cloud-arrow-up" style="margin-right:6px;"></i>上傳備份</button>
-                    <button class="btn-action" id="btn-sync-down" style="margin-top:0; border: 1px solid var(--accent-green); color: var(--accent-green); background: rgba(52, 211, 153, 0.15);" onclick="syncFromCloud()"><i class="fa-solid fa-cloud-arrow-down" style="margin-right:6px;"></i>下載還原</button>
+                    <button class="btn-action" id="btn-sync-up" style="margin-top:0; background-color:var(--accent-green); color:var(--on-accent);" onclick="syncToCloud()"><i class="fa-solid fa-cloud-arrow-up" style="margin-right:6px;"></i>上傳備份</button>
+                    <button class="btn-action" id="btn-sync-down" style="margin-top:0; border: 1px solid var(--accent-green); color: var(--accent-green); background: rgba(var(--accent-green-rgb), 0.15);" onclick="syncFromCloud()"><i class="fa-solid fa-cloud-arrow-down" style="margin-right:6px;"></i>下載還原</button>
                 </div>
             </div>
 
             <div class="card bento-span-4">
                 <div class="section-title"><span>💾 本機備份與還原點<small class="alias">本地終端備份</small></span></div>
                 <div style="display:flex; flex-direction:column; gap:10px; margin-top: 12px;">
-                    <button class="btn-action" style="margin-top:0; background-color: rgba(255,255,255,0.1); color: var(--text-main); border:1px solid rgba(255,255,255,0.2);" onclick="exportToFile()"><i class="fa-solid fa-download" style="margin-right:8px;"></i>下載備份檔 (.json)</button>
+                    <button class="btn-action" style="margin-top:0; background-color: rgba(var(--ov), 0.1); color: var(--text-main); border:1px solid rgba(var(--ov), 0.2);" onclick="exportToFile()"><i class="fa-solid fa-download" style="margin-right:8px;"></i>下載備份檔 (.json)</button>
                     <button class="btn-action" style="margin-top:0; background-color: transparent; border: 1px dashed var(--text-sub); color: var(--text-sub);" onclick="document.getElementById('import-file').click()"><i class="fa-solid fa-folder-open" style="margin-right:8px;"></i>讀取本地備份檔</button>
                     <input type="file" id="import-file" style="display:none;" accept=".json" onchange="importFromFile(event)">
                 </div>
             </div>
 
+            <div class="card bento-span-4">
+                <div class="section-title"><span>📄 匯出報表<small class="alias">CSV／PDF</small></span></div>
+                <p style="font-size:12px; color:var(--text-sub); line-height:1.6; margin:10px 0 0;">
+                    把「現在這一刻」的淨資產、曝險、帳戶、負債、持股、基金與歷史快照整理成報表。<b>CSV</b> 用 Excel 或 Google 試算表開啟；<b>PDF</b> 會開啟列印視窗，目的地選「另存為 PDF」即可（手機請用分享或列印選項）。報表不含 GAS 網址與金鑰。
+                </p>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top: 12px;">
+                    <button class="btn-action" style="margin-top:0; background-color: rgba(var(--ov), 0.1); color: var(--text-main); border:1px solid rgba(var(--ov), 0.2);" onclick="printReport()"><i class="fa-solid fa-file-pdf" style="margin-right:8px;"></i>列印／存成 PDF</button>
+                    <button class="btn-action" style="margin-top:0; background-color: rgba(var(--ov), 0.1); color: var(--text-main); border:1px solid rgba(var(--ov), 0.2);" onclick="exportReportCsv()"><i class="fa-solid fa-file-csv" style="margin-right:8px;"></i>下載完整報表 (.csv)</button>
+                    <button class="btn-action" style="margin-top:0; background-color: transparent; border: 1px dashed var(--text-sub); color: var(--text-sub);" onclick="exportHistoryCsv()"><i class="fa-solid fa-chart-line" style="margin-right:8px;"></i>只下載歷史快照 (.csv)，方便畫圖</button>
+                </div>
+            </div>
+
             <!-- 里程碑 -->
-            <div class="card bento-span-4" style="border: 1px solid rgba(192, 132, 252, 0.3); background: rgba(192, 132, 252, 0.05);">
+            <div class="card bento-span-4" style="border: 1px solid rgba(var(--accent-purple-rgb), 0.3); background: rgba(var(--accent-purple-rgb), 0.05);">
                 <div class="section-header">
                     <div class="section-title" style="color:var(--accent-purple);">🏆 財富自由里程碑</div>
                     <span class="milestone-badge" id="ui-milestone-percent">0%</span>
@@ -724,7 +767,7 @@
             </div>
 
             <!-- Monte Carlo -->
-            <div class="card bento-span-4" style="border: 1px solid rgba(236, 72, 153, 0.3); background: rgba(236, 72, 153, 0.05);">
+            <div class="card bento-span-4" style="border: 1px solid rgba(var(--accent-pink-rgb), 0.3); background: rgba(var(--accent-pink-rgb), 0.05);">
                 <div class="section-header" style="margin-bottom: 10px;">
                     <div class="section-title" style="color:var(--accent-pink);"><span>🎲 資產走勢模擬 (Monte Carlo)<small class="alias">奇異點預測矩陣</small></span></div>
                 </div>
@@ -743,36 +786,36 @@
                     <div class="form-label">每月持續投入 ($)</div>
                     <input type="number" class="form-input" id="mc-pmt" value="30000" step="1000" style="width: 100px;" oninput="updateStateValue('mcPmt', this.value)">
                 </div>
-                <button class="btn-action" style="background-color: #ec4899; color: #fff;" onclick="runMonteCarlo()"><i class="fa-solid fa-bolt" style="margin-right:6px;"></i>推演 1,000 條世界線</button>
+                <button class="btn-action" style="background-color: var(--accent-pink); color: #fff;" onclick="runMonteCarlo()"><i class="fa-solid fa-bolt" style="margin-right:6px;"></i>推演 1,000 條世界線</button>
                 <div id="mc-result-container" style="display:none; margin-top:15px;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                        <div style="background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); padding: 8px; border-radius: 8px; text-align: center;">
+                        <div style="background: rgba(var(--accent-green-rgb), 0.1); border: 1px solid rgba(var(--accent-green-rgb), 0.3); padding: 8px; border-radius: 8px; text-align: center;">
                             <div style="font-size: 11px; color: var(--accent-green); font-weight: 700;">🏆 達標機率</div>
-                            <div id="mc-success-prob" data-val="0" style="font-size: 20px; color: #fff; font-weight: 900;">--%</div>
+                            <div id="mc-success-prob" data-val="0" style="font-size: 20px; color: var(--text-strong); font-weight: 900;">--%</div>
                         </div>
-                        <div style="background: rgba(232, 121, 249, 0.1); border: 1px solid rgba(232, 121, 249, 0.3); padding: 8px; border-radius: 8px; text-align: center;">
+                        <div style="background: rgba(var(--status-alert-rgb), 0.1); border: 1px solid rgba(var(--status-alert-rgb), 0.3); padding: 8px; border-radius: 8px; text-align: center;">
                             <div style="font-size: 11px; color: var(--status-alert); font-weight: 700;">📉 重挫機率</div>
-                            <div id="mc-ruin-prob" data-val="0" style="font-size: 20px; color: #fff; font-weight: 900;">--%</div>
+                            <div id="mc-ruin-prob" data-val="0" style="font-size: 20px; color: var(--text-strong); font-weight: 900;">--%</div>
                             <div style="font-size: 10px; color: var(--text-sub); line-height: 1.4; margin-top: 2px;">推演期間內，資產曾跌至起始淨值 20% 以下</div>
                         </div>
                     </div>
-                    <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(192, 132, 252, 0.5); padding: 8px; border-radius: 8px; text-align: center; margin-bottom: 10px;">
+                    <div style="background: rgba(var(--ov), 0.03); border: 1px dashed rgba(var(--accent-purple-rgb), 0.5); padding: 8px; border-radius: 8px; text-align: center; margin-bottom: 10px;">
                         <div style="font-size: 11px; color: var(--accent-purple); font-weight: 700;">📍 預期財富中位數</div>
-                        <div id="mc-median-w" data-val="0" style="font-size: 18px; color: #fff; font-weight: 900;">$--</div>
+                        <div id="mc-median-w" data-val="0" style="font-size: 18px; color: var(--text-strong); font-weight: 900;">$--</div>
                     </div>
                     <div class="chart-box" style="height: 160px;"><canvas id="mcChart"></canvas></div>
                 </div>
             </div>
 
             <!-- 🎮 戰術成就與微型任務 -->
-            <div class="card bento-span-4 advanced-only" id="ui-achievements-card" style="border: 1px solid rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.05);">
+            <div class="card bento-span-4 advanced-only" id="ui-achievements-card" style="border: 1px solid rgba(var(--accent-orange-rgb), 0.35); background: rgba(var(--accent-orange-rgb), 0.05);">
                 <div class="section-header" style="margin-bottom: 10px;">
-                    <div class="section-title" style="color:var(--accent-orange); text-shadow: 0 0 8px rgba(251,191,36,0.4);"><span>🎮 成就與小任務<small class="alias">戰術成就與微型任務</small></span></div>
+                    <div class="section-title" style="color:var(--accent-orange); text-shadow: 0 0 8px rgba(var(--accent-orange-rgb), 0.4);"><span>🎮 成就與小任務<small class="alias">戰術成就與微型任務</small></span></div>
                 </div>
                 <div id="ui-current-main-quest" style="margin-bottom: 14px;"></div>
-                <div style="font-size:12px; color:var(--text-sub); margin: 14px 0 8px 0; font-weight:800; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px;">🎯 進行中的支線任務：</div>
+                <div style="font-size:12px; color:var(--text-sub); margin: 14px 0 8px 0; font-weight:800; border-bottom:1px solid rgba(var(--ov), 0.06); padding-bottom:4px;">🎯 進行中的支線任務：</div>
                 <div id="ui-side-quests"></div>
-                <div style="font-size:12px; color:var(--text-sub); margin: 16px 0 8px 0; font-weight:800; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px;">🏆 榮譽徽章牆 (達成自動點亮)：</div>
+                <div style="font-size:12px; color:var(--text-sub); margin: 16px 0 8px 0; font-weight:800; border-bottom:1px solid rgba(var(--ov), 0.06); padding-bottom:4px;">🏆 榮譽徽章牆 (達成自動點亮)：</div>
                 <div class="badge-grid" id="ui-badge-wall">
                     <div class="badge-item" id="badge-first" title="記錄第一筆資產歷史快照">
                         <div class="badge-icon">🌱</div>
@@ -811,7 +854,7 @@
             <div class="card bento-span-12">
                 <div class="section-header" style="margin-bottom:10px;">
                     <div class="section-title">📊 資產快照日曆與成長軌跡</div>
-                    <button class="btn-add" style="background-color: var(--accent-blue); border:none; color: #0f172a;" onclick="recordSnapshot()"><i class="fa-solid fa-camera" style="margin-right:4px;"></i>記錄今日快照</button>
+                    <button class="btn-add" style="background-color: var(--accent-blue); border:none; color: var(--on-accent);" onclick="recordSnapshot()"><i class="fa-solid fa-camera" style="margin-right:4px;"></i>記錄今日快照</button>
                 </div>
                 <div class="autosnap-row" id="autosnap-row">
                     <div class="autosnap-text">
@@ -821,10 +864,10 @@
                     </div>
                     <label class="autosnap-switch">
                         <input type="checkbox" id="input-auto-snapshot" onchange="toggleAutoSnapshot(this.checked)" aria-labelledby="autosnap-title" aria-describedby="autosnap-hint" style="opacity: 0; width: 0; height: 0;">
-                        <span class="slider-toggle" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); transition: .4s; border-radius: 24px;"></span>
+                        <span class="slider-toggle" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(var(--ov), 0.1); border:1px solid rgba(var(--ov), 0.2); transition: .4s; border-radius: 24px;"></span>
                     </label>
                 </div>
-                <div class="chart-box blur-target-chart" style="height: 250px; margin-bottom: 10px; display: none; background: rgba(0,0,0,0.3); border-radius:12px; padding:10px;" id="ui-history-chart-container">
+                <div class="chart-box blur-target-chart" style="height: 250px; margin-bottom: 10px; display: none; background: rgba(var(--well-rgb), calc(0.3 * var(--well-k))); border-radius:12px; padding:10px;" id="ui-history-chart-container">
                     <canvas id="historyChart" role="img" aria-label="淨資產與曝險比率走勢圖"></canvas>
                 </div>
                 <div class="history-summary blur-target" id="ui-history-summary" hidden></div>
@@ -849,7 +892,7 @@
     <button type="button" class="bottom-nav-item active" aria-current="page" onclick="showTab('tab-notes')"><i class="fa-solid fa-book-open" aria-hidden="true"></i><span>筆記</span></button>
     <button type="button" class="bottom-nav-item" aria-label="持倉總覽（雷達陣列）" onclick="showTab('tab-overview')"><i class="fa-solid fa-satellite-dish" aria-hidden="true"></i><span>持倉總覽</span></button>
     <button type="button" class="bottom-nav-item" aria-label="資產負債（資金核心）" onclick="showTab('tab-details')"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>資產負債</span></button>
-    <button type="button" class="bottom-nav-item" aria-label="現金流量" onclick="showTab('tab-cashflow')"><i class="fa-solid fa-money-bill-transfer" aria-hidden="true"></i><span>現金流</span></button>
+    <button type="button" class="bottom-nav-item" data-cf-nav aria-label="現金流量" onclick="showTab('tab-cashflow')"><i class="fa-solid fa-money-bill-transfer" aria-hidden="true"></i><span>現金流</span></button>
     <button type="button" class="bottom-nav-item advanced-nav" aria-label="策略工具（戰術中樞）" onclick="showTab('tab-tactics')"><i class="fa-solid fa-crosshairs" aria-hidden="true"></i><span>策略工具</span></button>
     <button type="button" class="bottom-nav-item advanced-nav" aria-label="壓力測試（風險情境）" onclick="showTab('tab-risk')"><i class="fa-solid fa-shield-virus" aria-hidden="true"></i><span>壓力測試</span></button>
     <button type="button" class="bottom-nav-item" aria-label="備份成長（雲端與PWA）" onclick="showTab('tab-settings')"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i><span>備份成長</span></button>
@@ -877,6 +920,9 @@
     </div>
 </dialog>
 
+<!-- 匯出報表：列印／存成 PDF 時才會把報表放進來（平常是隱藏的；必須是 <body> 的直接子元素） -->
+<div id="print-report" class="print-report" aria-hidden="true"></div>
+
 <script src="js/schema.js"></script>
 <script src="js/state.js"></script>
 <script src="js/core.js"></script>
@@ -891,6 +937,8 @@
 <script src="js/snapshots.js"></script>
 <script src="js/holdings.js"></script>
 <script src="js/pnl.js"></script>
+<script src="js/report.js"></script>
+<script src="js/cashflow.js"></script>
 <script src="js/next-action.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/main.js"></script>
