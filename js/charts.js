@@ -34,7 +34,7 @@ function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
         if (!container) return;
         var total = (values || []).reduce(function(sum, v) { return sum + (parseFloat(v) || 0); }, 0);
         if (total <= 0 || !labels || labels.length === 0) {
-            container.innerHTML = `<div style="font-size:12px; color:var(--text-sub); text-align:center; padding:18px 6px; border:1px dashed rgba(255,255,255,0.08); border-radius:10px;">${emptyMsg || '尚無部位數據'}</div>`;
+            container.innerHTML = `<div style="font-size:12px; color:var(--text-sub); text-align:center; padding:18px 6px; border:1px dashed rgba(var(--ov),0.08); border-radius:10px;">${emptyMsg || '尚無部位數據'}</div>`;
             return;
         }
         var items = labels.map(function(label, idx) {
@@ -56,7 +56,7 @@ function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
                             <span>${escapeHTML(item.label)}</span>
                         </div>
                         <div class="pct-legend-stats">
-                            <span class="pct-badge-val" style="color:${item.color};">${item.pct.toFixed(1)}%</span>
+                            <span class="pct-badge-val tint-text" style="--c:${item.color}; color:var(--tc);">${item.pct.toFixed(1)}%</span>
                             <span class="pct-amt-val blur-target">$${formatNum(item.val)}</span>
                         </div>
                     </div>
@@ -131,11 +131,42 @@ function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
         }
     }
 
+    /* 圖表畫在 canvas 上，吃不到 CSS 變數，所以顏色要在這裡從目前的主題讀出來（themeColor 在 theme.js） */
+    function chartTooltipColors() {
+        return {
+            backgroundColor: 'rgba(' + themeColor('--surface-rgb', '15,23,42') + ', 0.94)',
+            titleColor: themeColor('--accent-blue', '#38bdf8'),
+            bodyColor: themeColor('--text-main', '#f8fafc'),
+            borderColor: 'rgba(' + themeColor('--accent-blue-rgb', '56,189,248') + ', 0.35)'
+        };
+    }
+
+    /* 切換深色／淺色時，把已經畫好的圖表換成新主題的文字、提示框與走勢圖線條顏色 */
+    function applyChartTheme() {
+        if (typeof Chart === 'undefined') return;
+        Chart.defaults.color = themeColor('--text-sub', '#94a3b8');
+        var tip = chartTooltipColors(), blue = themeColor('--accent-blue', '#38bdf8'), purple = themeColor('--accent-purple', '#c084fc');
+        Object.keys(charts).forEach(function(id) {
+            var c = charts[id];
+            if (!c || !c.options) return;
+            if (c.options.plugins && c.options.plugins.tooltip) Object.assign(c.options.plugins.tooltip, tip);
+            if (id === 'history' && c.data.datasets.length > 1) {
+                c.data.datasets[0].borderColor = c.data.datasets[0].backgroundColor = blue;
+                c.data.datasets[1].borderColor = c.data.datasets[1].backgroundColor = purple;
+                c.options.scales.y.title.color = blue; c.options.scales.y1.title.color = purple;
+                c.update();   /* 走勢圖已關動畫；update('none') 不會重新套用資料集樣式，這裡用一般 update */
+            } else {
+                try { c.update('none'); } catch (e) { /* 圖表還沒有資料或已被銷毀：下次畫的時候就是新顏色 */ }
+            }
+        });
+    }
+
     function initCharts() {
         if (typeof Chart === 'undefined') return;
-        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.color = themeColor('--text-sub', '#94a3b8');
+        var tipColors = chartTooltipColors();
         var tooltipOpt = {
-            backgroundColor: 'rgba(15, 23, 42, 0.94)', titleColor: '#38bdf8', bodyColor: '#f8fafc', borderColor: 'rgba(56, 189, 248, 0.35)', borderWidth: 1, padding: 10, cornerRadius: 8,
+            backgroundColor: tipColors.backgroundColor, titleColor: tipColors.titleColor, bodyColor: tipColors.bodyColor, borderColor: tipColors.borderColor, borderWidth: 1, padding: 10, cornerRadius: 8,
             callbacks: {
                 label: function(context) {
                     var data = context.dataset.data || [];
@@ -184,8 +215,8 @@ function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
         charts.history = new Chart(document.getElementById('historyChart').getContext('2d'), {
             type: 'line',
             data: { datasets: [
-                { label: '淨資產（左軸）', data: [], yAxisID: 'y', borderColor: '#38bdf8', backgroundColor: '#38bdf8', borderWidth: 2, pointRadius: 3, pointHoverRadius: 6, tension: 0.25, fill: false },
-                { label: '曝險比率（右軸）', data: [], yAxisID: 'y1', borderColor: '#c084fc', backgroundColor: '#c084fc', borderWidth: 2, borderDash: [6, 4], pointStyle: 'rectRot', pointRadius: 4, pointHoverRadius: 7, tension: 0.25, fill: false, spanGaps: false }
+                { label: '淨資產（左軸）', data: [], yAxisID: 'y', borderColor: themeColor('--accent-blue', '#38bdf8'), backgroundColor: themeColor('--accent-blue', '#38bdf8'), borderWidth: 2, pointRadius: 3, pointHoverRadius: 6, tension: 0.25, fill: false },
+                { label: '曝險比率（右軸）', data: [], yAxisID: 'y1', borderColor: themeColor('--accent-purple', '#c084fc'), backgroundColor: themeColor('--accent-purple', '#c084fc'), borderWidth: 2, borderDash: [6, 4], pointStyle: 'rectRot', pointRadius: 4, pointHoverRadius: 7, tension: 0.25, fill: false, spanGaps: false }
             ] },
             options: {
                 responsive: true, maintainAspectRatio: false, parsing: false,
@@ -193,8 +224,8 @@ function renderPctBreakdownList(containerId, labels, values, colors, emptyMsg) {
                 interaction: { mode: 'index', intersect: false },
                 scales: {
                     x: { type: 'linear', bounds: 'data', grid: { display: false }, afterBuildTicks: function(scale) { scale.ticks = historyTickValues(historyAxisFirst, historyAxisLast, scale.width).map(function(v) { return { value: v }; }); }, ticks: { maxTicksLimit: 5, precision: 0, maxRotation: 0, callback: function(v) { return historyAxisLabel(v, historyAxisSpan); } } },
-                    y: { position: 'left', grace: '8%', grid: { color: historyGrid }, title: { display: true, text: '淨資產', color: '#38bdf8' }, ticks: { callback: function(v) { return compactMoney(v); } } },
-                    y1: { position: 'right', grace: '8%', grid: { drawOnChartArea: false }, title: { display: true, text: '曝險 %', color: '#c084fc' }, ticks: { callback: function(v) { return v + '%'; } } }
+                    y: { position: 'left', grace: '8%', grid: { color: historyGrid }, title: { display: true, text: '淨資產', color: themeColor('--accent-blue', '#38bdf8') }, ticks: { callback: function(v) { return compactMoney(v); } } },
+                    y1: { position: 'right', grace: '8%', grid: { drawOnChartArea: false }, title: { display: true, text: '曝險 %', color: themeColor('--accent-purple', '#c084fc') }, ticks: { callback: function(v) { return v + '%'; } } }
                 },
                 plugins: {
                     legend: { display: true, position: 'top', labels: { usePointStyle: true, boxWidth: 10, font: { size: 11 } } },

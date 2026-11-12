@@ -110,7 +110,7 @@
                 createRestorePoint('before-cloud-sync');
                 schemaLocked = false;   /* 使用者已確認要用雲端資料覆蓋，所以解除「只能看」的限制 */
                 var localMarketPrices = Object.assign({}, state.marketPrices || {});
-                Object.keys(incomingState).forEach(k => { state[k] = incomingState[k]; });
+                Object.assign(state, cfSettingDefaults()); Object.keys(incomingState).forEach(k => { state[k] = incomingState[k]; });
                 state.marketPrices = Object.assign({}, localMarketPrices, incomingState.marketPrices || {});
                 state.lastPriceSyncTime = incomingState.lastPriceSyncTime || null;
                 var priceUpdates = applyMarketPricesToStocks();

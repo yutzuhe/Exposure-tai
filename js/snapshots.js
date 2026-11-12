@@ -165,11 +165,11 @@
         var yearChangeColor = yearChange === null ? 'var(--text-sub)' : (yearChange > 0 ? 'var(--market-up)' : (yearChange < 0 ? 'var(--market-down)' : 'var(--text-sub)'));
         var yearChangeText = yearChange === null ? '今年尚無快照' : (yearChange > 0 ? '▲ +' : (yearChange < 0 ? '▼ -' : '')) + '$' + formatNum(Math.abs(yearChange));
 
-        var html = '<div style="background: rgba(15,23,42,0.6); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);">' +
+        var html = '<div style="background: rgba(var(--surface-rgb),0.6); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);">' +
                    '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">' +
-                   '<button onclick="changeCalMonth(-1)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--accent-blue); width:36px; height:36px; border-radius:50%; cursor:pointer;"><i class="fa-solid fa-chevron-left"></i></button>' +
+                   '<button onclick="changeCalMonth(-1)" style="background:rgba(var(--ov),0.05); border:1px solid rgba(var(--ov),0.1); color:var(--accent-blue); width:36px; height:36px; border-radius:50%; cursor:pointer;"><i class="fa-solid fa-chevron-left"></i></button>' +
                    '<div style="font-size:18px; font-weight:900; color:var(--text-main);">' + monthStr + ' <span style="font-size:12px; color:var(--text-sub);">(' + sorted.length + ' 筆)</span><div style="font-size:12px; font-weight:700; color:' + monthChangeColor + '; margin-top:3px;">' + monthChangeLabel + '：' + monthChangeText + '</div><div style="font-size:12px; font-weight:700; color:' + yearChangeColor + '; margin-top:2px;">' + yearChangeLabel + '：' + yearChangeText + '</div></div>' +
-                   '<button onclick="changeCalMonth(1)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--accent-blue); width:36px; height:36px; border-radius:50%; cursor:pointer;"><i class="fa-solid fa-chevron-right"></i></button>' +
+                   '<button onclick="changeCalMonth(1)" style="background:rgba(var(--ov),0.05); border:1px solid rgba(var(--ov),0.1); color:var(--accent-blue); width:36px; height:36px; border-radius:50%; cursor:pointer;"><i class="fa-solid fa-chevron-right"></i></button>' +
                    '</div><div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; text-align:center;">';
 
         ['日','一','二','三','四','五','六'].forEach(d => { html += '<div style="color:var(--text-sub); font-size:12px; font-weight:700; padding-bottom:6px;">' + d + '</div>'; });
@@ -183,16 +183,16 @@
             if (rec) {
                 cellStyle += 'cursor:pointer; ';
                 if (rec.isFirst) {
-                    cellStyle += 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);';
-                    innerHtml = '<div style="font-size:13px; font-weight:800; color:#fff;">' + day + '</div><div style="font-size:10px; color:var(--accent-blue);">首筆</div>';
+                    cellStyle += 'background: rgba(var(--ov),0.05); border: 1px solid rgba(var(--ov),0.1);';
+                    innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--text-strong);">' + day + '</div><div style="font-size:10px; color:var(--accent-blue);">首筆</div>';
                 } else if (rec.diff > 0) {
-                    cellStyle += 'background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.28);';
+                    cellStyle += 'background: rgba(var(--accent-red-rgb),0.12); border: 1px solid rgba(var(--accent-red-rgb),0.28);';
                     innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--market-up);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--market-up);">▲' + (rec.diff/10000).toFixed(1) + '萬</div>';
                 } else if (rec.diff < 0) {
-                    cellStyle += 'background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.28);';
+                    cellStyle += 'background: rgba(var(--accent-green-rgb),0.12); border: 1px solid rgba(var(--accent-green-rgb),0.28);';
                     innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--market-down);">' + day + '</div><div style="font-size:10px; font-weight:800; color:var(--market-down);">▼' + (Math.abs(rec.diff)/10000).toFixed(1) + '萬</div>';
                 } else {
-                    cellStyle += 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);';
+                    cellStyle += 'background: rgba(var(--ov),0.05); border: 1px solid rgba(var(--ov),0.1);';
                     innerHtml = '<div style="font-size:13px; font-weight:800; color:var(--text-main);">' + day + '</div><div style="font-size:10px; font-weight:700; color:var(--text-sub);">持平</div>';
                 }
             }
@@ -207,7 +207,7 @@
 
     function renderNotes() {
         var container = document.getElementById('notes-list-container'); if(!container) return;
-        if (!state.notes || state.notes.length === 0) { container.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:13px; padding:20px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">神經元庫存為空</div>'; return; }
+        if (!state.notes || state.notes.length === 0) { container.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:13px; padding:20px; border: 1px dashed rgba(var(--ov),0.1); border-radius: 12px;">神經元庫存為空</div>'; return; }
         container.innerHTML = state.notes.map((note, index) => `<div class="note-item"><div style="flex:1;"><div class="note-content-text">${escapeHTML(note.text)}</div><div style="font-size:11px; color:var(--accent-blue); margin-top:5px;">${escapeHTML(note.date)}</div></div><button class="btn-delete" onclick="deleteNote(${index})"><i class="fa-solid fa-trash-can"></i></button></div>`).join('');
     }
     function addNote() { var inputEl = document.getElementById('note-input'); if(!inputEl) return; var text = inputEl.value.trim(); if (!text) return; var now = new Date(); var dateStr = `${getLocalDateString(now)} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`; state.notes.unshift({ id: 'n'+Date.now(), date: dateStr, text: text }); inputEl.value = ''; saveData(); renderNotes(); }

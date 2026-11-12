@@ -14,7 +14,7 @@
         autoSnapshot: false, /* 自動記錄快照：預設關閉，要使用者自己打開 */
         rebalanceTargetInv: 50,
         kellyMu: 8.0, kellySigma: 18.0, mcYears: 10, mcMu: 8.0, mcSigma: 18.0, mcPmt: 30000,
-        livingExpense: 30000, blindMode: false, warRoomMode: false, sandboxMode: false,
+        livingExpense: 30000, cfRange: 60, monthlyIncome: 0, incomeDay: 0, cfDefaultDay: 0, /* 現金流預報：天數、每月收入、入帳日、預設扣款日（0＝沒填，用預設） */ blindMode: false, warRoomMode: false, sandboxMode: false,
         accounts: [], debts: [], stocks: [], funds: [], notes: [], history: [], marketPrices: {}, brokers: DEFAULT_BROKERS.slice(), detailedView: false,
         achievements: { first_blood: false, nw_1m: false, nw_5m: false, runway_6m: false, debt_light: false, perfect_exp: false },
         tacticsOrder: ['widget-rebalance', 'widget-dca', 'widget-vix', 'widget-dampener', 'widget-kelly', 'widget-glide', 'widget-manual'],

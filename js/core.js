@@ -40,7 +40,47 @@
         return hi;
     }
 
-    /* 帳戶、負債、持股、基金 → 所有加總數字。inp = { accounts, debts, stocks, funds, usdRate, livingExpense, targetNetWorth }
+    /* ===== 信貸還款進度 =====
+       信貸（本息攤還）可以填「已還期數」，或給「第一期繳款日」讓網頁依今天日期自動算已還幾期（繳款日當天就算已繳）。
+       剩餘本金 = 原始貸款金額 × g^k − 月付額 × (g^k − 1) ÷ 月利率，g = 1 + 月利率、k = 已還期數；0% 利率就按期數平均。
+       月付額永遠用「原始貸款金額、年利率、期數」算，不會因為已經還了幾期而變；全部還完 → 剩餘 0、月付 0。
+       沒填任何進度（舊資料）時完全維持原本算法：本金當成現在還欠的錢，月付額照期數重算。
+       日期都用 YYYY-MM-DD 字串與整數運算，不碰 Date 與時鐘（今天的日期由呼叫端傳進來）。 */
+    function daysInMonth(y, m) { return m === 2 ? (((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 29 : 28) : ([4, 6, 9, 11].indexOf(m) >= 0 ? 30 : 31); }
+    function parseYmd(str) {
+        var mt = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(str === undefined || str === null ? '' : str).trim());
+        if (!mt) return null;
+        var y = +mt[1], m = +mt[2], d = +mt[3];
+        return (m < 1 || m > 12 || d < 1 || d > daysInMonth(y, m)) ? null : { y: y, m: m, d: d };
+    }
+    /* 從第一期繳款日起，每月同一天繳一期（那個月沒有該日就算月底），到今天為止已經到期幾期（最多 total 期）。日期格式錯誤或還沒到第一期 → 0。 */
+    function countPaidByDate(firstPay, todayStr, total) {
+        var f = parseYmd(firstPay), t = parseYmd(todayStr);
+        if (!f || !t || !(total > 0)) return 0;
+        var todayKey = t.y * 10000 + t.m * 100 + t.d, paid = 0;
+        for (var k = 0; k < total; k++) {
+            var idx = f.y * 12 + (f.m - 1) + k, y = Math.floor(idx / 12), m = (idx % 12) + 1;
+            if (y * 10000 + m * 100 + Math.min(f.d, daysInMonth(y, m)) <= todayKey) paid++; else break;
+        }
+        return paid;
+    }
+    /* 一筆信貸現在的狀態。d = { principal, rate, term（年）, progress: 'manual'|'auto', paid（手動已還期數）, firstPay（自動用的第一期繳款日）}
+       tracked＝有填進度（手動期數 > 0，或選了自動）；done＝已經全部還完。 */
+    function creditLoanStatus(d, todayStr) {
+        var p = parseFloat(d.principal) || 0, r = parseFloat(d.rate) || 0, t = parseFloat(d.term) || 0;
+        var total = Math.round(t * 12), auto = d.progress === 'auto';
+        var paid = total > 0 ? (auto ? countPaidByDate(d.firstPay, todayStr, total) : Math.max(0, Math.floor(parseFloat(d.paid) || 0))) : 0;
+        if (paid > total) paid = total;
+        var pmt = calculatePMT(p, r, t), balance = p, done = false;
+        if (paid > 0) {
+            if (paid >= total) { balance = 0; pmt = 0; done = p > 0; }
+            else if (r > 0) { var i = (r / 100) / 12, g = Math.pow(1 + i, paid); balance = Math.max(0, p * g - pmt * (g - 1) / i); }
+            else balance = Math.max(0, p - pmt * paid);
+        }
+        return { principal: p, rate: r, term: t, total: total, paid: paid, remaining: Math.max(0, total - paid), balance: balance, pmt: pmt, done: done, tracked: paid > 0 || auto };
+    }
+
+    /* 帳戶、負債、持股、基金 → 所有加總數字。inp = { accounts, debts, stocks, funds, usdRate, livingExpense, targetNetWorth, today（YYYY-MM-DD，信貸自動算已還期數用） }
        positions 是每個投資部位的 { val, mult, isCollateral, kind }，壓力測試與維持率都用它。 */
     function computePortfolio(inp) {
         var accounts = inp.accounts || [], debts = inp.debts || [], stocks = inp.stocks || [], funds = inp.funds || [];
@@ -48,10 +88,9 @@
 
         var pledge = 0, credit = 0, monthlyPledgeInterest = 0, monthlyCreditPMT = 0, weightedInterestSum = 0;
         debts.forEach(function(d) {
-            var p = parseFloat(d.principal) || 0, r = parseFloat(d.rate) || 0, t = parseFloat(d.term) || 0;
-            weightedInterestSum += p * r;
-            if (d.type === 'pledge') { pledge += p; monthlyPledgeInterest += (p * (r / 100)) / 12; }
-            else { credit += p; monthlyCreditPMT += calculatePMT(p, r, t); }
+            var p = parseFloat(d.principal) || 0, r = parseFloat(d.rate) || 0;
+            if (d.type === 'pledge') { weightedInterestSum += p * r; pledge += p; monthlyPledgeInterest += (p * (r / 100)) / 12; }
+            else { var loan = creditLoanStatus(d, inp.today); weightedInterestSum += loan.balance * r; credit += loan.balance; monthlyCreditPMT += loan.pmt; }
         });
         var monthlyOutflow = monthlyPledgeInterest + monthlyCreditPMT + (parseFloat(inp.livingExpense) || 0);
         var totalDebt = pledge + credit, avgRate = totalDebt > 0 ? (weightedInterestSum / totalDebt) : 2.5;

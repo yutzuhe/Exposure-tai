@@ -4,13 +4,16 @@
     /* ===== 下一步行動：把「質押維持率／曝險／活水水位／投資現金配比／本月新增資金」合成「一個」建議 =====
        原本三個小工具各算各的、依據也不同（再平衡看投資÷現金、曝險看目標±容忍、發薪日看活水缺口），可能同時給出互相衝突的建議。
        這裡改成依風險高低排序，只挑最該先做的一件，其餘放進「其他提醒」。
-       優先序：① 維持率低於 130%　② 曝險高於目標且超出容忍區　③ 維持率低於 166%　④ 活水低於安全水位
-              ⑤ 曝險低於目標且超出容忍區（①～④都沒事才建議加碼）　⑥ 閒置活水可佈署　⑦ 投資／現金配比微調（不能與風險設定衝突）
+       優先序：① 維持率低於 130%　② 曝險高於目標且超出容忍區　（②.5 未來 90 天現金會不夠付：有填每月收入的預報）　③ 維持率低於 166%　（③.5 現金會不夠付：沒填收入的預報）　④ 活水低於安全水位
+              （④.5 未來 90 天現金會低於安全水位）　⑤ 曝險低於目標且超出容忍區（①～④都沒事才建議加碼）　⑥ 閒置活水可佈署　⑦ 投資／現金配比微調（不能與風險設定衝突）
+       現金流預報（js/cashflow.js 的 buildCashflow）從 i.cashflow 傳進來；i.cashSoon 是「近 7 天要扣款／入帳」那句話，原樣顯示在卡片上。
        NEXT-ACTION-BEGIN：以下是純函式，不碰 DOM 與 state，方便單獨測試；金額文字用全域 formatNum。 */
     var NA_MIN_AMOUNT = 1000;   /* 差距小於這個金額就不提醒 */
     function naMoney(x) { return '$' + formatNum(x); }
     function naUp(x) { return Math.ceil(Math.max(0, x) / 1000 - 1e-9) * 1000; }    /* 風險相關的金額一律無條件進位到千元 */
     function naRound(x) { return Math.round(Math.max(0, x) / 1000) * 1000; }
+    function naDate(s) { var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(s || '')); return m ? (+m[1]) + '/' + (+m[2]) : String(s || ''); }
+    function naInDays(n) { return n === 0 ? '今天' : n + ' 天後'; }
 
     /* 本月新增資金怎麼分：先補活水缺口，再依「離目標曝險還差多少」放 2 倍槓桿或 1 倍。 */
     function allocateNewFunds(newFunds, safeLine, cash, totalInv, totalExp, totalDebt, targetPct) {
@@ -30,7 +33,7 @@
     function computeNextAction(i) {
         var money = naMoney;
         if (!(i.netWorth > 0)) {
-            return { primary: { key: 'nodata', level: 'info', badge: '資料待填', title: '先輸入資產與負債', detail: '輸入帳戶、持股與借款後，這裡會告訴你下一步該做什麼。', lines: [] }, others: [], fundsNote: '', metrics: null };
+            return { primary: { key: 'nodata', level: 'info', badge: '資料待填', title: '先輸入資產與負債', detail: '輸入帳戶、持股與借款後，這裡會告訴你下一步該做什麼。', lines: [] }, others: [], fundsNote: '', cashNote: '', metrics: null };
         }
         var target = i.targetPct, tol = i.tolerance;
         var expPct = i.totalExp / i.netWorth * 100, dev = expPct - target, absDev = Math.abs(dev);
@@ -43,6 +46,9 @@
         var over = dev > 0 && absDev >= tol, under = dev < 0 && absDev >= tol;
         var funds = i.newFunds > 0 ? i.newFunds : 0;
         var cands = [], extras = [];
+        var cf = i.cashflow && i.cashflow.ok ? i.cashflow : null;
+        var cashGap = !!(cf && cf.shortDate), cashDip = !!(cf && !cf.shortDate && cf.belowSafeDate && !(shortage >= NA_MIN_AMOUNT));
+        var cashRisk = !!(cf && (cf.shortDate || cf.belowSafeDate));     /* 未來 90 天現金不夠付或會低於水位：先別建議加碼、也不建議把活水拿去佈署 */
 
         function marginLines() {
             var ls = [{ t: '還款約 ' + money(naUp(repay)) + '，維持率就能回到 166%' },
@@ -68,8 +74,21 @@
             detail: '現金低於安全水位（依 VIX 與負債推算），急用錢時可能被迫賣股。',
             lines: [{ t: '現金 ' + money(i.cash) + '，安全水位 ' + money(i.safeLine) }, { t: '建議補足約 ' + money(naUp(shortage)) }],
             short: '活水低於安全水位，缺約 ' + money(naUp(shortage)) });
+        if (cashGap) {
+            var gapLevel = cf.level === 'alert' ? 'alert' : 'watch', gapNeed = naUp(-cf.minBalance), gapLines = [{ t: '最大缺口約 ' + money(gapNeed) + '，要在 ' + naDate(cf.shortDate) + ' 之前補上' }];
+            if (i.safeLine > 0) gapLines.push({ t: '想維持安全水位 ' + money(i.safeLine) + '，要補約 ' + money(naUp(i.safeLine - cf.minBalance)) });
+            if (!cf.hasIncome) gapLines.push({ t: '預報還沒計入薪資等收入；有固定收入請到「現金流量」分頁填入，提醒才會準。', note: true });
+            cands.push({ prio: gapLevel === 'alert' ? 2.5 : 3.5, key: 'cash-gap', level: gapLevel, badge: gapLevel === 'alert' ? '優先處理' : '建議處理', title: '預計現金不夠付',
+                detail: '照目前已知的收支，' + naDate(cf.shortDate) + '（' + naInDays(cf.shortDays) + '）起現金會變成負的。', lines: gapLines,
+                short: '預計 ' + naDate(cf.shortDate) + ' 起現金不夠付，缺約 ' + money(gapNeed) });
+        } else if (cashDip) {
+            cands.push({ prio: 4.5, key: 'cash-dip', level: 'watch', badge: '提前準備', title: '預計現金會低於安全水位',
+                detail: naDate(cf.belowSafeDate) + '（' + naInDays(cf.belowSafeDays) + '）起，照目前已知的收支，現金會低於安全水位 ' + money(i.safeLine) + '。',
+                lines: [{ t: '預計最低現金 ' + money(cf.minBalance) + '，建議在那之前補足約 ' + money(naUp(i.safeLine - cf.minBalance)) }],
+                short: '預計 ' + naDate(cf.belowSafeDate) + ' 起現金低於安全水位' });
+        }
         if (under) {
-            if (shortage >= NA_MIN_AMOUNT || marginAlert || marginWatch) {
+            if (shortage >= NA_MIN_AMOUNT || marginAlert || marginWatch || cashRisk) {
                 extras.push('曝險低於目標約 ' + money(naRound(expRoom)) + '，等上面的事處理好再加碼');
             } else {
                 cands.push({ prio: 5, key: 'under-exposure', level: 'info', badge: '可以加碼', title: '曝險低於目標，可以加碼',
@@ -79,7 +98,7 @@
                     short: '曝險低於目標約 ' + money(naRound(expRoom)) });
             }
         }
-        if (!over && !under && excess >= NA_MIN_AMOUNT && excess > i.safeLine * 0.2 && expRoom >= NA_MIN_AMOUNT) {
+        if (!over && !under && !cashRisk && excess >= NA_MIN_AMOUNT && excess > i.safeLine * 0.2 && expRoom >= NA_MIN_AMOUNT) {
             cands.push({ prio: 6, key: 'idle-cash', level: 'info', badge: '可以佈署', title: '閒置活水可分批佈署',
                 detail: '曝險還在目標範圍內，多出來的活水可以分批投入，不必一次到位。',
                 lines: [{ t: '閒置活水約 ' + money(naRound(excess)) },
@@ -102,6 +121,7 @@
             }
         }
         if (!over && !under && absDev >= tol * 0.8) extras.push('曝險接近容忍邊界（和目標差 ' + absDev.toFixed(1) + ' 個百分點）');
+        if (cf && cf.stale && cf.stale.length) extras.push(cf.stale.map(function(s) { return s.name; }).join('、') + ' 的預計發放日已經過了，更新下一次的日期才會排進現金流預報');
 
         cands.sort(function(a, b) { return a.prio - b.prio; });
         var primary = cands.length ? cands[0] : { key: 'ok', level: 'safe', badge: '目前沒有急事', title: '維持現狀', lines: [],
@@ -120,7 +140,7 @@
                 fundsNote = '本月新增資金 ' + money(funds) + '：補活水 ' + money(alloc.cash) + '、2 倍槓桿 ' + money(alloc.x2) + '、1 倍 ' + money(alloc.x1) + '。';
             }
         }
-        return { primary: primary, others: others, fundsNote: fundsNote,
+        return { primary: primary, others: others, fundsNote: fundsNote, cashNote: i.cashSoon || '',
                  metrics: { expPct: expPct, dev: dev, margin: margin, repay: repay, addColl: addColl, shortage: shortage, excess: excess, expRoom: expRoom } };
     }
     /* NEXT-ACTION-END */
@@ -137,6 +157,7 @@
         (p.lines || []).forEach(function(line) { var li = document.createElement('li'); li.textContent = line.t; if (line.note) li.className = 'na-note'; ul.appendChild(li); });
         ul.hidden = !(p.lines && p.lines.length);
         var fundsEl = document.getElementById('ui-na-funds'); fundsEl.textContent = res.fundsNote || ''; fundsEl.hidden = !res.fundsNote;
+        var cashEl = document.getElementById('ui-na-cash'); if (cashEl) { cashEl.textContent = res.cashNote || ''; cashEl.hidden = !res.cashNote; }
         var details = document.getElementById('ui-na-others'), list = document.getElementById('ui-na-others-list'); list.textContent = '';
         res.others.forEach(function(text) { var li = document.createElement('li'); li.textContent = text; list.appendChild(li); });
         details.hidden = !res.others.length;

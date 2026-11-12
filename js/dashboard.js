@@ -7,7 +7,7 @@
         var fc = document.getElementById('fleet-container'); if(!fc) return;
 
         document.getElementById('fleet-icon').innerText = lvl.icon;
-        var nameEl = document.getElementById('fleet-name'); nameEl.innerText = lvl.name; nameEl.style.color = lvl.color;
+        var nameEl = document.getElementById('fleet-name'); nameEl.innerText = lvl.name; nameEl.classList.add('tint-text'); nameEl.style.setProperty('--c', lvl.color); nameEl.style.color = 'var(--tc)';
         fc.style.borderColor = `${lvl.color}66`;
 
         var progressEl = document.getElementById('fleet-progress'); var nextReqEl = document.getElementById('fleet-next-req');
@@ -15,10 +15,10 @@
             var pct = fleet.pct;
             if(progressEl) { progressEl.style.width = pct + '%'; progressEl.style.background = lvl.color; }
             var shortfall = fleet.shortfall;
-            if(nextReqEl) nextReqEl.innerHTML = `距離升級 [<span style="color:${nextLvl.color}; font-weight:800;">${nextLvl.name}</span>] 尚需: $<span id="ui-fleet-shortfall" data-val="${shortfall}">${formatNum(shortfall)}</span>`;
+            if(nextReqEl) nextReqEl.innerHTML = `距離升級 [<span class="tint-text" style="--c:${nextLvl.color}; color:var(--tc); font-weight:800;">${nextLvl.name}</span>] 尚需: $<span id="ui-fleet-shortfall" data-val="${shortfall}">${formatNum(shortfall)}</span>`;
         } else {
             if(progressEl) { progressEl.style.width = '100%'; progressEl.style.background = lvl.color; }
-            if(nextReqEl) nextReqEl.innerHTML = `<span style="color:${lvl.color}; font-weight:800;">已達最高階級，您是宇宙的霸主！</span>`;
+            if(nextReqEl) nextReqEl.innerHTML = `<span class="tint-text" style="--c:${lvl.color}; color:var(--tc); font-weight:800;">已達最高階級，您是宇宙的霸主！</span>`;
         }
         if (currentFleetLevel === -1) { currentFleetLevel = currentLvlIdx; } 
         else if (currentLvlIdx > currentFleetLevel && isAppReady) { triggerConfetti(); currentFleetLevel = currentLvlIdx; } 
@@ -28,10 +28,10 @@
     function updateVixSignal(val) {
         var vix = parseFloat(val) || 0; state.vix = vix; var res = document.getElementById('vix-signal-result'); if (!res) return;
         var band = vixBandOf(vix);
-        if (band === 'extreme') { res.innerHTML = '<div class="risk-status status-alert">極高波動 · 風險升高</div>'; res.style.background = 'rgba(232, 121, 249, 0.08)'; }
-        else if (band === 'high') { res.innerHTML = '<div class="risk-status status-watch">高波動 · 留意風險</div>'; res.style.background = 'rgba(251, 191, 36, 0.08)'; }
-        else if (band === 'rising') { res.innerHTML = '<div class="risk-status status-watch">波動升溫 · 持續觀察</div>'; res.style.background = 'rgba(251, 191, 36, 0.06)'; }
-        else { res.innerHTML = '<div class="risk-status status-safe">一般波動區間</div>'; res.style.background = 'rgba(34, 211, 238, 0.06)'; }
+        if (band === 'extreme') { res.innerHTML = '<div class="risk-status status-alert">極高波動 · 風險升高</div>'; res.style.background = 'rgba(var(--status-alert-rgb),0.08)'; }
+        else if (band === 'high') { res.innerHTML = '<div class="risk-status status-watch">高波動 · 留意風險</div>'; res.style.background = 'rgba(var(--accent-orange-rgb),0.08)'; }
+        else if (band === 'rising') { res.innerHTML = '<div class="risk-status status-watch">波動升溫 · 持續觀察</div>'; res.style.background = 'rgba(var(--accent-orange-rgb),0.06)'; }
+        else { res.innerHTML = '<div class="risk-status status-safe">一般波動區間</div>'; res.style.background = 'rgba(var(--accent-cyan-rgb),0.06)'; }
     }
 
     function setStress(val) { var slider = document.getElementById('stress-slider'); if (slider) { slider.value = val; updateStress(val); } }
@@ -41,7 +41,7 @@
         var dd = computeDrawdown(currentNetWorth, state.history, getLocalDateString(), Date.now());
         if (dd.underwater) {
             mddEl.style.display = 'block';
-            mddEl.innerHTML = `<div class="underwater-box"><div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#38bdf8;"><i class="fa-solid fa-water"></i> 深海潛航監控</div><div style="display:flex; justify-content:space-between;"><div><div style="font-size:11px; color:#94a3b8;">最大回撤 (MDD)</div><div style="font-size:20px; font-weight:900; color:var(--accent-red);">${dd.dropPct.toFixed(2)}%</div></div><div style="text-align:right;"><div style="font-size:11px; color:#94a3b8;">水下天數</div><div style="font-size:20px; font-weight:900; color:#fff;">${dd.diffDays} 天</div></div></div></div>`;
+            mddEl.innerHTML = `<div class="underwater-box dark-island"><div style="font-size:12px; font-weight:800; margin-bottom:8px; color:#38bdf8;"><i class="fa-solid fa-water"></i> 深海潛航監控</div><div style="display:flex; justify-content:space-between;"><div><div style="font-size:11px; color:#94a3b8;">最大回撤 (MDD)</div><div style="font-size:20px; font-weight:900; color:var(--accent-red);">${dd.dropPct.toFixed(2)}%</div></div><div style="text-align:right;"><div style="font-size:11px; color:#94a3b8;">水下天數</div><div style="font-size:20px; font-weight:900; color:#fff;">${dd.diffDays} 天</div></div></div></div>`;
         } else { mddEl.style.display = 'none'; }
     }
 
@@ -124,7 +124,7 @@
                     目前進度：$${formatNum(netWorth)} / $${formatNum(nextMilestone)} (${mainPct.toFixed(1)}%)
                 </div>
                 <div class="vs-bar-container" style="height:8px; margin:0; background:var(--input-bg);">
-                    <div style="background:var(--accent-orange); height:100%; width:${mainPct}%; transition: width 0.5s ease; box-shadow: 0 0 10px rgba(251,191,36,0.5);"></div>
+                    <div style="background:var(--accent-orange); height:100%; width:${mainPct}%; transition: width 0.5s ease; box-shadow: 0 0 10px rgba(var(--accent-orange-rgb),0.5);"></div>
                 </div>
             `;
         }
@@ -140,7 +140,7 @@
                     <span style="font-size:12px; font-weight:700; color:${runwayMonths >= 6 ? 'var(--accent-green)' : 'var(--text-sub)'};">${runwayMonths > 99 ? 'MAX' : runwayMonths.toFixed(1)} / 6.0 個月</span>
                 </div>
                 <div class="quest-desc">將活水續航力提升至 6 個月以上，獲得「防禦大師」徽章。</div>
-                <div class="vs-bar-container" style="height:4px; margin:0; border:none; background:rgba(255,255,255,0.1);">
+                <div class="vs-bar-container" style="height:4px; margin:0; border:none; background:rgba(var(--ov),0.1);">
                     <div style="background:var(--accent-green); height:100%; width:${q1Pct}%;"></div>
                 </div>
             </div>
@@ -156,7 +156,7 @@
                     <span style="font-size:12px; font-weight:700; color:${q2Done ? 'var(--accent-green)' : 'var(--text-sub)'};">${debtRatio.toFixed(1)}% / &lt; 30%</span>
                 </div>
                 <div class="quest-desc">在保有借貸槓桿的前提下，將總負債比壓縮至 30% 以下。</div>
-                <div class="vs-bar-container" style="height:4px; margin:0; border:none; background:rgba(255,255,255,0.1);">
+                <div class="vs-bar-container" style="height:4px; margin:0; border:none; background:rgba(var(--ov),0.1);">
                     <div style="background:var(--accent-blue); height:100%; width:${q2Pct}%;"></div>
                 </div>
             </div>
@@ -172,7 +172,7 @@
                     <span style="font-size:12px; font-weight:700; color:${q3Done ? 'var(--accent-green)' : 'var(--text-sub)'};">誤差 ${expDiff.toFixed(1)}%</span>
                 </div>
                 <div class="quest-desc">完美執行再平衡，使實際曝險與目標曝險誤差小於 1%。</div>
-                <div class="vs-bar-container" style="height:4px; margin:0; border:none; background:rgba(255,255,255,0.1);">
+                <div class="vs-bar-container" style="height:4px; margin:0; border:none; background:rgba(var(--ov),0.1);">
                     <div style="background:var(--accent-purple); height:100%; width:${q3Pct}%;"></div>
                 </div>
             </div>
@@ -193,7 +193,7 @@
     }
     /* 所有「算數」都在上面的 CORE 區（computePortfolio、computeStress…）；這裡只負責餵資料進去、把結果寫到畫面上。 */
     function updateTotals() {
-        var P = computePortfolio({ accounts: state.accounts, debts: state.debts, stocks: state.stocks, funds: state.funds, usdRate: usdTwdRate, livingExpense: state.livingExpense, targetNetWorth: state.targetNetWorth });
+        var P = computePortfolio({ accounts: state.accounts, debts: state.debts, stocks: state.stocks, funds: state.funds, usdRate: usdTwdRate, livingExpense: state.livingExpense, targetNetWorth: state.targetNetWorth, today: getLocalDateString() });
         var totalCashSum = P.totalCash, totalPledgeSum = P.pledge, totalCreditSum = P.credit, totalDebt = P.totalDebt, totalMonthlyOutflow = P.monthlyOutflow;
         state.cash = totalCashSum; 
         animateNumber('ui-total-cash-sum', totalCashSum); animateNumber('ui-cashflow-cash', totalCashSum, '$');
@@ -289,9 +289,11 @@
         updateFleetStatus(netWorth); updateDrawdown(netWorth); updateSimulator(netWorth, totalExp, ratioRaw); 
         checkAndRenderQuests(netWorth, runwayMonths, debtRatio, ratioRaw);
         renderRebalanceWidget(totalCashSum, totalInv);
+        var cashflow = refreshCashflow();   /* 現金流預報：要等 updateDynamicBuffer 算好安全水位之後 */
         lastNextActionInput = { netWorth: netWorth, totalExp: totalExp, totalInv: totalInv, cash: totalCashSum, debt: totalDebt, pledge: totalPledgeSum, collateral: collateralTotal,
             unpledgedStock: stressPortfolio(stressPositions, 0).unpledgedStock, targetPct: parseFloat(state.effectiveTargetRatio) || 100, tolerance: parseFloat(state.toleranceRatio) || 5,
-            safeLine: state.dynamicSafeLine || 0, rebalanceTargetInv: state.rebalanceTargetInv, newFunds: 0 };
+            safeLine: state.dynamicSafeLine || 0, rebalanceTargetInv: state.rebalanceTargetInv, newFunds: 0,
+            cashflow: cashflow, cashSoon: cfSoonText(cashflow, 3) };
         refreshNextAction();
 
         var elTicker = document.getElementById('ui-ticker-text');
@@ -305,6 +307,7 @@
             else elChronos.innerHTML = fire.ok ? `<span>${fire.years}</span><span class="chronos-unit">年</span><span>${fire.remMonths}</span><span class="chronos-unit">個月</span>` : `<span style="font-size:15px;">持續累積動能中</span>`;
         }
 
+        updateDebtSummaries();
         runSniperDCA();
         debouncedHeavyUpdate(v1x, v2x, totalCashSum, v0x);
     }

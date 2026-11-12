@@ -72,6 +72,8 @@
                     ['accounts','debts','stocks','funds','notes','history','marketPrices','brokers','achievements','tacticsOrder','tacticsPinned'].forEach(k => { if(parsed[k]) state[k] = parsed[k]; });
                     state.brokers = normalizeBrokerList(state.brokers, state.stocks);
                     ['cash','targetRatio','toleranceRatio','targetNetWorth','glideMax','glideMin','vix','biasRatio','kellyMu','kellySigma','mcYears','mcMu','mcSigma','mcPmt','livingExpense','rebalanceTargetInv'].forEach(k => { if(parsed[k] !== undefined) state[k] = parseFloat(parsed[k]); });
+                    ['monthlyIncome','incomeDay','cfDefaultDay'].forEach(k => { if(parsed[k] !== undefined) state[k] = parseFloat(parsed[k]) > 0 ? parseFloat(parsed[k]) : 0; });   /* 現金流預報設定：壞值一律當作「沒填」 */
+                    if (parsed.cfRange !== undefined) state.cfRange = cfRangeOf(parsed.cfRange);
                     ['lifeAge','lifeAgeYear','retireAge'].forEach(k => { if(parsed[k] !== undefined) state[k] = parseFloat(parsed[k]) || 0; });   /* 年齡導航欄位：壞值一律當作「沒填」 */
                     if (['networth','age','both'].indexOf(parsed.glideBasis) >= 0) state.glideBasis = parsed.glideBasis;
                     state.autoSnapshot = parsed.autoSnapshot === true;   /* 只認真正的 true；舊資料沒有這個欄位＝關閉 */
@@ -101,7 +103,8 @@
             'mc-years': state.mcYears, 'mc-mu': state.mcMu, 'mc-sigma': state.mcSigma, 'mc-pmt': state.mcPmt,
             'input-living-expense': state.livingExpense, 'input-rebal-slider': state.rebalanceTargetInv,
             'input-life-age': lifeAgeNow() || '', 'input-retire-age': state.retireAge > 0 ? state.retireAge : '', 'life-savings': state.mcPmt,
-            'input-glide-basis': state.glideBasis, 'input-target-ratio-slider': state.targetRatio
+            'input-glide-basis': state.glideBasis, 'input-target-ratio-slider': state.targetRatio,
+            'input-cf-default-day': state.cfDefaultDay > 0 ? state.cfDefaultDay : '', 'input-cf-income': state.monthlyIncome > 0 ? state.monthlyIncome : '', 'input-cf-income-day': state.incomeDay > 0 ? state.incomeDay : ''
         };
         Object.keys(mapInputs).forEach(id => { var el = document.getElementById(id); if(el) el.value = mapInputs[id]; });
         var gasTokenEl = document.getElementById('input-gas-token');
@@ -135,7 +138,7 @@
                 if (!(await confirmDialog(`即將匯入備份檔並覆蓋目前資料，確定繼續嗎？`, { title: '匯入備份檔', okText: '匯入並覆蓋', danger: true }))) return;
                 createRestorePoint('before-import');
                 schemaLocked = false;
-                Object.assign(state, incoming); state.lastPriceSyncTime = incoming.lastPriceSyncTime || null; state.sandboxMode = false; saveData(); showToastAfterReload('已匯入備份檔。', 'success'); location.reload(); 
+                Object.assign(state, cfSettingDefaults(), incoming); state.lastPriceSyncTime = incoming.lastPriceSyncTime || null; state.sandboxMode = false; saveData(); showToastAfterReload('已匯入備份檔。', 'success'); location.reload(); 
             } catch(err) { showToast("檔案讀取失敗：" + err.message, 'error'); } finally { event.target.value = ''; }
         };
         reader.readAsText(file);
