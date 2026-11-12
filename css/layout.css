@@ -60,7 +60,7 @@
             display: none;
             grid-column: span 12;
             padding: 10px 16px;
-            background: linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, transparent 100%);
+            background: linear-gradient(90deg, rgba(var(--accent-blue-rgb), 0.15) 0%, transparent 100%);
             border-left: 4px solid var(--accent-blue);
             border-radius: 8px;
             font-size: 14px;
